@@ -256,5 +256,8 @@ shared. Swap the stub in `movements/registry.ts` and the movement appears in the
 
 ## Credits
 
+- Wood textures for the Vitrine frame: generated with FLUX (fal.ai), then cropped to a single
+  continuous timber, made seamless and given derived normal maps (`public/textures/wood`).
+
 - Piano: *Salamander Grand Piano V3* by Alexander Holm, CC BY 3.0, via Tone.js.
 - Built with three.js, postprocessing, Tone.js and @tonejs/midi.

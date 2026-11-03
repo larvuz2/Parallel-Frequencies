@@ -3,7 +3,7 @@ import { composeReverie } from '../../input/DemoComposer';
 import { VitrineWorld } from './VitrineWorld';
 import { VITRINE_CAMERA, VITRINE_GROUPS, VITRINE_PARAMS, VITRINE_ROUTES, VITRINE_TARGETS } from './params';
 import { VITRINE_PRESETS } from './presets';
-import { VEIN_PALETTES, WOODS } from './palettes';
+import { VEIN_PALETTES } from './palettes';
 
 export const vitrine: MovementDefinition = {
   id: 'vitrine',
@@ -18,7 +18,7 @@ export const vitrine: MovementDefinition = {
   presets: VITRINE_PRESETS,
   modTargets: VITRINE_TARGETS,
   defaultRoutes: VITRINE_ROUTES,
-  featured: ['vt.palette', 'vt.wood', 'vt.camera'],
+  featured: ['vt.palette', 'vt.woodTexture', 'vt.camera'],
   keepOnPreset: ['vt.count', 'vt.strands'],
   engineDefaults: {
     'post.tonemap': 'aces', 'post.bloom': 0.55, 'post.bloomThreshold': 0.7, 'post.bloomRadius': 0.75, 'post.drift': 0,
@@ -32,7 +32,7 @@ export const vitrine: MovementDefinition = {
     const r = (a: number, b: number) => a + Math.random() * (b - a);
     return {
       'vt.palette': pick(VEIN_PALETTES).id,
-      'vt.wood': pick(WOODS).id,
+      'vt.woodTexture': pick(['walnut', 'walnut', 'oak', 'ebony', 'wenge', 'charred', 'cherry', 'whiteoak']),
       'vt.camera': pick(VITRINE_CAMERA).value,
       'vt.folds': r(0.35, 0.85),
       'vt.foldScale': r(0.6, 1.4),

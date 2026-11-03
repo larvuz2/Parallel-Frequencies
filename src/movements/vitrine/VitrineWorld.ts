@@ -69,6 +69,9 @@ export class VitrineWorld implements MovementInstance {
   private userPitch = 0;
   private userZoom = 1;
   private woodId = '';
+  /** length of beam covered by one repeat of the wood texture */
+  private tileLen = 2.4;
+  private texLoader = new THREE.TextureLoader();
   /** current frame dimensions (from the sidebar) */
   private fd = { w: 5.6, h: 2.9, d: 2.0, t: 0.11 };
   private frameKey = '';
@@ -187,6 +190,17 @@ export class VitrineWorld implements MovementInstance {
     const { w, h, d, t } = this.fd;
     const beam = (len: number, axis: 'x' | 'y' | 'z', x: number, y: number, z: number) => {
       const g = new THREE.BoxGeometry(len, t, t);
+      // texture coordinates in real units: the grain runs along the beam at a constant scale,
+      // and each beam starts at a different place in the plank so no two look the same
+      const L = this.tileLen;
+      const pos = g.attributes.position, nrm = g.attributes.normal, uv = g.attributes.uv;
+      const ou = Math.random(), ov = 0.12 + Math.random() * 0.6;
+      for (let i = 0; i < pos.count; i++) {
+        const px = pos.getX(i), py = pos.getY(i), pz = pos.getZ(i);
+        if (Math.abs(nrm.getX(i)) > 0.5) uv.setXY(i, (pz + 0.5) / L + ou, py / (L / 4) + ov);       // end grain
+        else uv.setXY(i, px / L + ou, (Math.abs(nrm.getY(i)) > 0.5 ? pz : py) / (L / 4) + ov);
+      }
+      uv.needsUpdate = true;
       const m = new THREE.Mesh(g, this.woodMat);
       if (axis === 'y') m.rotation.z = Math.PI / 2;
       if (axis === 'z') m.rotation.y = Math.PI / 2;
@@ -198,6 +212,28 @@ export class VitrineWorld implements MovementInstance {
       for (const sz of [-1, 1]) beam(w + t, 'x', 0, (sy * h) / 2, (sz * d) / 2);
       for (const sx of [-1, 1]) beam(d, 'z', (sx * w) / 2, (sy * h) / 2, 0);
     }
+  }
+
+  /** Photographic wood (generated scans in public/textures/wood) or the procedural grain. */
+  private setWood(tex: string, procId: string) {
+    const old = [this.woodMat.map, this.woodMat.normalMap];
+    if (tex === 'procedural') {
+      this.woodMat.map = this.woodTexture(procId);
+      this.woodMat.normalMap = null;
+    } else {
+      const base = `${import.meta.env.BASE_URL}textures/wood/${tex}`;
+      const aniso = this.ctx.renderer.capabilities.getMaxAnisotropy();
+      const prep = (t: THREE.Texture, srgb: boolean) => {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.anisotropy = aniso;
+        t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+        return t;
+      };
+      this.woodMat.map = prep(this.texLoader.load(`${base}.jpg`), true);
+      this.woodMat.normalMap = prep(this.texLoader.load(`${base}-normal.jpg`), false);
+    }
+    this.woodMat.needsUpdate = true;
+    for (const t of old) t?.dispose();
   }
 
   private woodTexture(id: string) {
@@ -437,9 +473,10 @@ export class VitrineWorld implements MovementInstance {
     // ---- look
     const pal = { a: p.str('vt.veinA'), b: p.str('vt.veinB'), c: p.str('vt.veinC') };
     // ---- vitrine & stage
-    const fk = ['vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam'].map((k) => p.num(k).toFixed(3)).join('|');
+    const fk = ['vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.grain'].map((k) => p.num(k).toFixed(3)).join('|');
     if (fk !== this.frameKey) {
       this.frameKey = fk;
+      this.tileLen = 2.4 / p.num('vt.grain');
       this.fd = { w: p.num('vt.frameW'), h: p.num('vt.frameH'), d: p.num('vt.frameD'), t: p.num('vt.beam') };
       this.buildFrame();
       this.floor.position.y = -this.fd.h / 2 - this.fd.t / 2 - 0.001;
@@ -447,7 +484,7 @@ export class VitrineWorld implements MovementInstance {
     this.woodMat.color.set(p.str('vt.woodTint'));
     this.woodMat.roughness = p.num('vt.woodRough');
     this.woodMat.clearcoat = p.num('vt.woodCoat');
-    this.woodMat.map?.repeat.set(p.num('vt.grain'), 1);
+    this.woodMat.normalScale.setScalar(p.num('vt.woodRelief'));
     const bg = new THREE.Color(p.str('vt.bgColor'));
     (this.scene.background as THREE.Color).copy(bg);
     const fog = this.scene.fog as THREE.Fog;
@@ -468,12 +505,11 @@ export class VitrineWorld implements MovementInstance {
     const tint = new THREE.Color(p.str('vt.matterColor'));
     const keyCol = new THREE.Color(p.str('vt.keyColor'));
     const rimCol = new THREE.Color(p.str('vt.rimColor'));
-    const wood = p.str('vt.wood');
+    const tex = p.str('vt.woodTexture');
+    const wood = tex === 'procedural' ? 'proc:' + p.str('vt.wood') : tex;
     if (wood !== this.woodId) {
       this.woodId = wood;
-      this.woodMat.map?.dispose();
-      this.woodMat.map = this.woodTexture(wood);
-      this.woodMat.needsUpdate = true;
+      this.setWood(tex, p.str('vt.wood'));
     }
     this.frame.visible = p.bool('vt.frame');
     this.floor.visible = p.bool('vt.floor');
@@ -668,6 +704,7 @@ export class VitrineWorld implements MovementInstance {
     this.fibreMat.dispose();
     this.dotMat.dispose();
     this.woodMat.map?.dispose();
+    this.woodMat.normalMap?.dispose();
     this.woodMat.dispose();
     this.envTex.dispose();
     this.target.dispose();

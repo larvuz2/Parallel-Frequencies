@@ -38,7 +38,7 @@ const BASE_PARAMS: ParamDef[] = [
   { key: 'vt.sway', label: 'Sway', group: 'scene', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.4, format: pct },
   { key: 'vt.fov', label: 'Lens', group: 'scene', type: 'range', min: 12, max: 70, step: 1, default: 21, format: deg },
   { key: 'vt.frame', label: 'Wooden frame', group: 'scene', type: 'toggle', default: true },
-  { key: 'vt.wood', label: 'Wood', group: 'scene', type: 'select', default: 'walnut', options: WOODS.map((w) => ({ value: w.id, label: w.label, swatches: [w.base, w.light] })) },
+  { key: 'vt.wood', label: 'Procedural wood colour', group: 'scene', type: 'select', default: 'walnut', options: WOODS.map((w) => ({ value: w.id, label: w.label, swatches: [w.base, w.light] })) },
   { key: 'vt.floor', label: 'Floor', group: 'scene', type: 'toggle', default: true },
   { key: 'vt.woodLight', label: 'Light on the wood', group: 'scene', type: 'range', min: 0, max: 3, step: 0.01, default: 0.9, format: x2 },
   { key: 'vt.keyAz', label: 'Light direction', group: 'scene', type: 'range', min: -180, max: 180, step: 1, default: -35, format: deg },
@@ -170,6 +170,25 @@ const NEW_PARAMS: ParamDef[] = [
   { key: 'vt.rimColor', label: 'Rim colour', group: 'lighting', type: 'color', default: '#808ca6' },
 
   /* frame */
+  {
+    key: 'vt.woodTexture', label: 'Wood texture', group: 'frame', type: 'select', default: 'walnut',
+    hint: 'Photographic wood scans (generated with FLUX, made seamless, with a relief map so the grain catches the light). Procedural uses the Wood colour below.',
+    options: [
+      { value: 'walnut', label: 'American walnut', swatches: ['#4a2a1a', '#7a4428'] },
+      { value: 'oak', label: 'Smoked oak', swatches: ['#6b5a4a', '#9a8670'] },
+      { value: 'whiteoak', label: 'Quarter-sawn white oak', swatches: ['#d8bb92', '#c79b62'] },
+      { value: 'ash', label: 'Pale ash', swatches: ['#efdcb5', '#dcc292'] },
+      { value: 'cherry', label: 'American cherry', swatches: ['#b9683a', '#d98a52'] },
+      { value: 'teak', label: 'Golden teak', swatches: ['#c98a45', '#e0a860'] },
+      { value: 'zebrano', label: 'Zebrano', swatches: ['#e2c28f', '#a8642c'] },
+      { value: 'wenge', label: 'Wenge', swatches: ['#2a1a12', '#7a3e22'] },
+      { value: 'ebony', label: 'Macassar ebony', swatches: ['#120c08', '#8a4a20'] },
+      { value: 'charred', label: 'Charred cedar (shou sugi ban)', swatches: ['#1a1a1a', '#5a5a5a'] },
+      { value: 'reclaimed', label: 'Weathered reclaimed oak', swatches: ['#8a8680', '#b0aca4'] },
+      { value: 'procedural', label: 'Procedural (Wood colour)' },
+    ],
+  },
+  { key: 'vt.woodRelief', label: 'Grain relief', group: 'frame', type: 'range', min: 0, max: 3, step: 0.01, default: 1, format: x2, hint: 'Depth of the pores and grain in the light.' },
   { key: 'vt.woodTint', label: 'Wood tint', group: 'frame', type: 'color', default: '#ffffff', hint: 'Multiplies the wood colour. White = natural wood.' },
   { key: 'vt.frameW', label: 'Width', group: 'frame', type: 'range', min: 2.5, max: 10, step: 0.05, default: 5.6, format: x2 },
   { key: 'vt.frameH', label: 'Height', group: 'frame', type: 'range', min: 1.5, max: 6, step: 0.05, default: 2.9, format: x2 },
@@ -213,7 +232,7 @@ const ORDER = [
   'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade',
   'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',
   'vt.key', 'vt.keyColor', 'vt.keyAz', 'vt.keyEl', 'vt.ambient', 'vt.rim', 'vt.rimColor', 'vt.sheen', 'vt.gloss',
-  'vt.frame', 'vt.wood', 'vt.woodTint', 'vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.woodRough', 'vt.woodCoat', 'vt.grain', 'vt.woodLight',
+  'vt.frame', 'vt.woodTexture', 'vt.woodRelief', 'vt.wood', 'vt.woodTint', 'vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.woodRough', 'vt.woodCoat', 'vt.grain', 'vt.woodLight',
   'vt.bgColor', 'vt.floor', 'vt.floorColor', 'vt.floorRough', 'vt.fogNear', 'vt.fogFar', 'vt.spot', 'vt.spotColor', 'vt.spotAngle', 'vt.env',
 ];
 
