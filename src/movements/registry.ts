@@ -2,6 +2,7 @@ import type { MovementDefinition } from '../core/types';
 import { impressionism } from './impressionism';
 import { neoplasticism } from './neoplasticism';
 import { baroque } from './baroque';
+import { symbolism } from './symbolism';
 
 const soon = (id: string, title: string, pairing: string, musical: string, description: string): MovementDefinition => ({
   id, title, pairing, musical, description, available: false,
@@ -19,7 +20,7 @@ export const MOVEMENTS: MovementDefinition[] = [
   soon('romanticism', 'Romanticism', 'Friedrich × Chopin', 'Romantic music', 'Volumetric clouds, atmospheric scattering, dynamic landscapes.'),
   soon('realism', 'Realism', 'Courbet × Mussorgsky', 'Verismo', 'Physically based materials, realistic light, reflections.'),
   impressionism,
-  soon('symbolism', 'Symbolism', 'Redon × Scriabin', 'Late-Romantic music', 'Dreamlike fog, spectral gradients, morphing geometry.'),
+  symbolism,
   soon('expressionism', 'Expressionism', 'Kandinsky × Schoenberg', 'Atonality', 'Noise displacement, turbulent vector fields, chromatic aberration.'),
   soon('cubism', 'Cubism', 'Picasso × Stravinsky', 'Modernism', 'Voronoi fragmentation, polygonal morphing, multi-camera compositing.'),
   neoplasticism,

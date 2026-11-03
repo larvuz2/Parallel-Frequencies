@@ -19,8 +19,16 @@ Live movements:
   window (soft shadows, ambient occlusion, god rays) and by the music: every note is a candle-light
   travelling the spiral of its contrapuntal voice, and each voice leaves golden dust behind it.
 
-Switch movements with the title dropdown, `M`, or `?movement=baroque` / `?movement=neoplasticism`
-in the URL.
+- **Symbolism — Redon × Scriabin (GPU particle simulation).** Up to a million particles are
+  simulated entirely on the GPU (positions, velocities and colours in float textures). They dream
+  into visions — Redon's floating eye, a flower, a radiant halo, a galaxy, the mystic knot — and are
+  stirred by 3D curl-noise currents. Each note bursts through the cloud and dyes it in its colour
+  from Scriabin's light keyboard. Held notes spin vortices, harmonic tension dissolves the vision
+  into smoke, and luminous trails come from temporal feedback. *Les Noirs* draws charcoal particles
+  on paper instead.
+
+Switch movements with the title dropdown, `M`, or `?movement=symbolism` / `baroque` /
+`neoplasticism` in the URL.
 
 ---
 
@@ -57,7 +65,7 @@ the computer-keyboard piano all work there.
 | `R` | Record video (with sound) |
 | `D` / `O` | Play demo / open file |
 | `M` | Next movement |
-| `1`–`7` | *(De Stijl, Baroque)* switch camera move live |
+| `1`–`7` | *(De Stijl, Baroque, Symbolism)* switch camera move live |
 
 When the **computer-keyboard piano** is on, `A W S E D F T G Y H U J K` play notes, `Z`/`X` shift the
 octave and `Space` is the sustain pedal. Shortcuts then need `Shift`.
@@ -156,6 +164,20 @@ whose sounding pipes glow, a baldacchino after Bernini, a KIFS folded ornament, 
 and Apollonian vaults. The march runs at reduced resolution (*Render quality → March resolution*)
 and is upscaled. The dust trails are GPU particles, occluded using the march depth.
 
+## Symbolism: synaesthesia
+
+| Music | Vision |
+| --- | --- |
+| **Pitch class** | Colour, from Scriabin's *clavier à lumières* (C red, G orange, D yellow, A green, E pearly blue, F♯ violet-blue…) |
+| **Pitch** | Height where the note acts on the vision; the angle around it follows the circle of fifths |
+| **Velocity** | Force and reach of the burst |
+| **Held notes** | Vortices that spin the cloud while they sound |
+| **Harmonic tension** | Dissolves the vision into turbulent smoke; consonance gathers it again |
+| **Key** | Tints the whole vision in the key's Scriabin colour; in Auto, key changes and phrase endings bring a new vision; the mystic knot's windings follow the harmony |
+| **Sustain pedal** | Longer light trails |
+
+Particle count is under *Particles* (16k / 65k / 262k / 1M). On a strong GPU, try 262k or 1M.
+
 ## Architecture
 
 ```
@@ -180,6 +202,7 @@ src/
     impressionism/     params, presets, palettes, brush system, surface, shaders, atmosphere
     neoplasticism/     De Stijl: lattice world, camera director, depth of field, Mozart demo
     baroque/           raymarched SDF chapel, voice-lights, trails, Bach demo
+    symbolism/         GPGPU particle visions, Scriabin colour keyboard, trails, Scriabin demo
   ui/                  schema-driven sidebar, dropdowns, transport bar, recorder
 ```
 
