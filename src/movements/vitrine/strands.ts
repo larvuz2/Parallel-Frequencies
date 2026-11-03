@@ -252,9 +252,13 @@ void main() {
   }
   #ifdef WISP
   // translucent combed smoke: grey, tinted at the edges by the vein colours, fading as it drifts away
-  vec3 smoke = mix(vec3(0.2, 0.21, 0.23), vein * 0.6, 0.08 + 0.3 * hh(vec2(vSeed * 0.19, 6.1)) * hh(vec2(vSeed * 0.07, 1.3)));
+  // cool tints (lavender / cyan) with only a rare warm thread, like the reference
+  vec3 tint = hh(vec2(vSeed * 0.31, 2.2)) < 0.85 ? (hh(vec2(vSeed * 0.13, 9.1)) < 0.55 ? uVeinB : uVeinC) : uVeinA;
+  vec3 smoke = mix(vec3(0.2, 0.21, 0.23), tint * 0.6, 0.15 + 0.35 * hh(vec2(vSeed * 0.19, 6.1)));
   float fade = smoothstep(0.1, 0.3, vU) * pow(1.0 - vU, 1.4);
   float a = uWispAlpha * fade * tube * tube * (0.5 + 0.5 * tube);
+  // smoke reads at the silhouette; where it hangs in front of the mass it stays nearly invisible
+  a *= 1.0 - 0.85 * smoothstep(0.25, 0.85, abs(dot(N, V)));
   fragColor = vec4((smoke * (0.6 + 0.5 * diff * uKey) + emis * 0.3) * a, a);
   #else
   fragColor = vec4(col + emis * (0.55 + 0.45 * tube), 1.0);
