@@ -19,7 +19,7 @@ const SEED = /* glsl */ `
 uniform float uWispShare;
 bool isWisp(float si, vec3 d0) {
   // smoke leaves from some regions only, a share of the strands there
-  return snoise3(d0 * 1.3 + 7.7) > -0.05 && hh(vec2(si * 0.053, 4.4)) < uWispShare * 2.0;
+  return snoise3(d0 * 1.3 + 7.7) > 0.3 && hh(vec2(si * 0.053, 4.4)) < uWispShare * 3.5;
 }
 vec3 seedDir(float si) {
   float u = hh(vec2(si * 0.0131, 7.1)) * 2.0 - 1.0;
@@ -161,7 +161,7 @@ void main() {
   float taper = pow(sin(3.14159265 * clamp(u * 0.92 + 0.04, 0.0, 1.0)), 0.5);
   float w = uWidth * (0.55 + 0.9 * hh(vec2(aIdx * 0.37, 5.5))) * taper;
   #ifdef WISP
-  w = uWidth * (1.2 + 2.0 * hh(vec2(aIdx * 0.37, 5.5))) * (0.6 + 1.4 * u);
+  w = uWidth * (3.0 + 5.0 * hh(vec2(aIdx * 0.37, 5.5))) * (0.5 + 2.0 * u);
   #endif
   c0.xy += nrm * side * w / uRes * c0.w;
   gl_Position = c0;
@@ -252,9 +252,9 @@ void main() {
   }
   #ifdef WISP
   // translucent combed smoke: grey, tinted at the edges by the vein colours, fading as it drifts away
-  vec3 smoke = mix(vec3(0.16, 0.17, 0.19), vein * 0.75, 0.25 + 0.45 * hh(vec2(vSeed * 0.19, 6.1)));
+  vec3 smoke = mix(vec3(0.2, 0.21, 0.23), vein * 0.6, 0.08 + 0.3 * hh(vec2(vSeed * 0.19, 6.1)) * hh(vec2(vSeed * 0.07, 1.3)));
   float fade = smoothstep(0.1, 0.3, vU) * pow(1.0 - vU, 1.4);
-  float a = uWispAlpha * fade * tube * tube;
+  float a = uWispAlpha * fade * tube * tube * (0.5 + 0.5 * tube);
   fragColor = vec4((smoke * (0.6 + 0.5 * diff * uKey) + emis * 0.3) * a, a);
   #else
   fragColor = vec4(col + emis * (0.55 + 0.45 * tube), 1.0);

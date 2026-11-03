@@ -51,7 +51,7 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0006, format: (v) => `${(v * 100).toFixed(2)}%/s` },
 
   /* form */
-  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.24, format: x2 },
+  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.02, format: x2 },
   { key: 'vt.width', label: 'Width', group: 'form', type: 'range', min: 0.8, max: 1.8, step: 0.01, default: 1.05, format: (v) => `${x2(v)}×` },
   { key: 'vt.folds', label: 'Crumple', group: 'form', type: 'range', min: 0, max: 1.2, step: 0.01, default: 0.45, format: x2, hint: 'Depth of the folds. Loudness deepens them (see Mapping).' },
   { key: 'vt.lobes', label: 'Lobes', group: 'form', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.75, format: x2, hint: 'Large billowing lobes that break the round silhouette. 0 = a ball.' },
@@ -108,11 +108,11 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.17, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
   { key: 'vt.gloss', label: 'Strand gloss', group: 'light', type: 'range', min: 4, max: 120, step: 1, default: 36 },
 
-  { key: 'vt.smokeStrands', label: 'Smoke strands', group: 'form', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.14, format: pct, hint: 'Share of strands (in some regions) that peel off the surface and drift away as combed smoke.' },
-  { key: 'vt.smokeLength', label: 'Smoke reach', group: 'form', type: 'range', min: 0.5, max: 6, step: 0.05, default: 2.6, format: x2 },
+  { key: 'vt.smokeStrands', label: 'Smoke strands', group: 'form', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.07, format: pct, hint: 'Share of strands (in some regions) that peel off the surface and drift away as combed smoke.' },
+  { key: 'vt.smokeLength', label: 'Smoke reach', group: 'form', type: 'range', min: 0.5, max: 6, step: 0.05, default: 1.7, format: x2 },
   { key: 'vt.smokeLift', label: 'Smoke lift', group: 'form', type: 'range', min: 0, max: 2, step: 0.01, default: 0.7, format: x2, hint: 'How steeply smoke leaves the surface.' },
   { key: 'vt.smokeCurl', label: 'Smoke curl', group: 'form', type: 'range', min: 0, max: 3, step: 0.01, default: 1.1, format: x2 },
-  { key: 'vt.smokeOpacity', label: 'Smoke opacity', group: 'form', type: 'range', min: 0, max: 1, step: 0.01, default: 0.28, format: pct },
+  { key: 'vt.smokeOpacity', label: 'Smoke opacity', group: 'form', type: 'range', min: 0, max: 1, step: 0.01, default: 0.1, format: pct },
 
   /* light */
   { key: 'vt.key', label: 'Key light', group: 'light', type: 'range', min: 0, max: 3, step: 0.01, default: 0.95, format: x2 },
