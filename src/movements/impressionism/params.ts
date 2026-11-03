@@ -151,6 +151,15 @@ export const IMPRESSIONISM_PARAMS: ParamDef[] = [
 
   /* ---------------- Atmosphere ---------------- */
   { key: 'im.atmosphere', label: 'Atmosphere', group: 'atmosphere', type: 'toggle', default: true, hint: 'Tiny motes of light drifting in front of the canvas — a living painting.' },
+  {
+    key: 'im.moteTone', label: 'Mote tone', group: 'atmosphere', type: 'select', default: 'auto',
+    hint: 'Glowing motes of light read on dark grounds; on pale canvases fine drifting dust reads better. Auto picks by the ground tone.',
+    options: [
+      { value: 'auto', label: 'Auto (by ground)' },
+      { value: 'light', label: 'Glowing light' },
+      { value: 'dust', label: 'Drifting dust' },
+    ],
+  },
   { key: 'im.motes', label: 'Motes', group: 'atmosphere', type: 'range', min: 0, max: 12000, step: 100, default: 2600, hint: 'Number of drifting particles.' },
   { key: 'im.moteSize', label: 'Mote size', group: 'atmosphere', type: 'range', min: 0.2, max: 5, step: 0.05, default: 1.1, format: (v) => v.toFixed(2) },
   { key: 'im.moteDrift', label: 'Drift', group: 'atmosphere', type: 'range', min: 0, max: 1, step: 0.01, default: 0.3, format: pct, hint: 'Speed of the drifting air.' },

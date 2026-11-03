@@ -183,7 +183,7 @@ export class ImpressionismWorld implements MovementInstance {
     const jitter = p.num('im.colorJitter') * modScale(m, 'jitter');
     let [colA, colB] = accent
       ? [jitterColor(pal.accent, jitter * 0.5), jitterColor(mixRGB(pal.accent, pal.colors[pal.colors.length - 1], 0.35), jitter * 0.5)]
-      : this.pickColors(e.note, pn, y, e.velocity, modOffset(m, 'value'), jitter, pal);
+      : this.pickColors(e.note, pn, y, e.velocity, modOffset(m, 'value') + (type === BRUSH_TYPES.wash ? 0.45 : 0), jitter, pal);
     if (type === BRUSH_TYPES.wash) {
       // washes are thin veils of air-mixed colour, never mud
       colA = mixRGB(colA, pal.haze, 0.45);
@@ -477,7 +477,13 @@ export class ImpressionismWorld implements MovementInstance {
     au.uGlow.value = p.num('im.moteGlow');
     au.uEnergy.value = react * clamp(modOffset(g, 'atmosphere'), 0, 2);
     au.uPulse.value = react * sig.pulse;
-    (au.uColor.value as THREE.Color).setRGB(...mixRGB(pal.light, [1, 0.95, 0.85], 0.4));
+    const toneMode = p.str('im.moteTone');
+    const g0 = hexToRgb(groundById(p.str('im.groundTone')).color);
+    const groundLum = 0.2126 * g0[0] + 0.7152 * g0[1] + 0.0722 * g0[2];
+    const dust = toneMode === 'dust' || (toneMode === 'auto' && groundLum > 0.5);
+    at.setDust(dust);
+    if (dust) (au.uColor.value as THREE.Color).setRGB(...(mixRGB(g0, [0.12, 0.1, 0.09], 0.62).map((c) => Math.pow(c, 2.2)) as RGB));
+    else (au.uColor.value as THREE.Color).setRGB(...mixRGB(pal.light, [1, 0.95, 0.85], 0.4));
     au.uPixelRatio.value = this.ctx.renderer.getPixelRatio();
     au.uViewH.value = this.ctx.renderer.domElement.height / this.ctx.renderer.getPixelRatio();
   }

@@ -39,6 +39,7 @@ export class Atmosphere {
         uColor: { value: new THREE.Color(1, 0.95, 0.88) },
         uPixelRatio: { value: 1 },
         uViewH: { value: 1000 },
+        uDust: { value: 0 },
       },
       vertexShader: /* glsl */ `
         ${NOISE_GLSL}
@@ -72,13 +73,19 @@ export class Atmosphere {
       fragmentShader: /* glsl */ `
         uniform vec3 uColor;
         uniform float uGlow;
+        uniform float uDust;
         varying float vAlpha;
         varying float vTw;
         void main() {
           vec2 d = gl_PointCoord - 0.5;
           float r = length(d) * 2.0;
           float a = exp(-r * r * 3.5) * smoothstep(1.0, 0.7, r);
-          gl_FragColor = vec4(uColor * a * vAlpha * uGlow * 0.6, 1.0);
+          if (uDust > 0.5) {
+            // fine dust: soft, darker specks drifting in the light
+            gl_FragColor = vec4(uColor, a * vAlpha * uGlow * 0.35);
+          } else {
+            gl_FragColor = vec4(uColor * a * vAlpha * uGlow * 0.6, 1.0);
+          }
         }
       `,
       transparent: true,
@@ -90,6 +97,15 @@ export class Atmosphere {
     this.points = new THREE.Points(g, this.material);
     this.points.frustumCulled = false;
     this.points.renderOrder = 10;
+  }
+
+  setDust(dust: boolean) {
+    const b = dust ? THREE.NormalBlending : THREE.AdditiveBlending;
+    if (this.material.blending !== b) {
+      this.material.blending = b;
+      this.material.needsUpdate = true;
+    }
+    this.material.uniforms.uDust.value = dust ? 1 : 0;
   }
 
   setCount(n: number) {

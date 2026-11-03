@@ -245,7 +245,7 @@ class App implements AppApi {
     if (!this.statsEl.classList.contains('hidden')) {
       this.statsEl.textContent = `${Math.round(this.engine.fps)} fps`;
     }
-    if (this.params.bool('src.idle') && (!this.transport || !this.transport.playing)) {
+    if (this.params.bool('src.idle') && !this.transport) {
       const now = performance.now() / 1000;
       const idleFor = now - Math.max(this.engine.bus.lastInputTime, this.engine.bus.lastLiveInputTime);
       if (idleFor > this.params.num('src.idleAfter')) this.startDream();
