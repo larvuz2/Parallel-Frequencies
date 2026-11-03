@@ -51,7 +51,7 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0006, format: (v) => `${(v * 100).toFixed(2)}%/s` },
 
   /* form */
-  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.5, format: x2 },
+  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.38, format: x2 },
   { key: 'vt.width', label: 'Width', group: 'form', type: 'range', min: 0.8, max: 1.8, step: 0.01, default: 1.05, format: (v) => `${x2(v)}×` },
   { key: 'vt.folds', label: 'Crumple', group: 'form', type: 'range', min: 0, max: 1.2, step: 0.01, default: 0.45, format: x2, hint: 'Depth of the folds. Loudness deepens them (see Mapping).' },
   { key: 'vt.foldScale', label: 'Fold size', group: 'form', type: 'range', min: 0.3, max: 2.5, step: 0.01, default: 1.2, format: x2, hint: 'Small values: a few large folds. Large values: many small creases.' },
