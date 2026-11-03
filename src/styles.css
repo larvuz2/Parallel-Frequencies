@@ -127,6 +127,17 @@ input[type='range'].bipolar::-webkit-slider-runnable-track {
 .switch.on { background: var(--accent); }
 .switch.on::after { transform: translateX(12px); background: #fff; }
 
+/* colour */
+.ctl-color { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.color-pick { display: inline-flex; align-items: center; gap: 10px; }
+.ctl-value.hex { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 10.5px; letter-spacing: 0.04em; }
+.color-swatch {
+  position: relative; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 0 0 3px rgba(255, 255, 255, 0.03); transition: box-shadow 0.2s;
+}
+.color-swatch:hover { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 0 4px rgba(239, 176, 142, 0.18); }
+.color-swatch input { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); opacity: 0; cursor: pointer; border: 0; padding: 0; }
+
 /* dropdown */
 .dd-button {
   display: inline-flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 9px 6px 10px;

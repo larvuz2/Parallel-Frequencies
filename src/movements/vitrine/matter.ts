@@ -15,10 +15,11 @@ export function createMatter(detail = 110) {
   g = mergeVertices(g);
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      uTime: { value: 0 }, uR: { value: 1.12 }, uAmp: { value: 0.55 }, uFreq: { value: 0.95 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.025 }, uLobe: { value: 0.6 },
+      uTime: { value: 0 }, uR: { value: 1.12 }, uAmp: { value: 0.55 }, uFreq: { value: 0.95 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.025 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 },
       uStretch: { value: new THREE.Vector3(1.22, 1, 1) }, uFlowScale: { value: 1.5 },
       uKeyDir: { value: new THREE.Vector3(-0.4, 0.7, 0.5).normalize() }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uRim: { value: 0.6 },
       uAlbedo: { value: 0.2 }, uSheen: { value: 0.5 }, uCrestGlow: { value: 0.9 },
+      uTint: { value: new THREE.Color(1, 1, 1) }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
       uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
       uGrowth: { value: 1 }, uStreak: { value: 1 }, uStripes: { value: 40 },
       uNumSrc: { value: 0 }, uSrcPos: { value: [] as THREE.Vector4[] }, uSrcForce: { value: [] as THREE.Vector4[] }, uSrcCol: { value: [] as THREE.Vector4[] },
@@ -65,6 +66,7 @@ export function createMatter(detail = 110) {
       ${FIELD}
       uniform vec3 uKeyDir;
       uniform float uKey, uAmbient, uRim, uAlbedo, uSheen, uCrestGlow, uGrowth, uStreak, uStripes;
+      uniform vec3 uTint, uKeyCol, uRimCol;
       uniform vec3 uVeinA, uVeinB, uVeinC;
       uniform int uNumSrc;
       uniform vec4 uSrcPos[${MAX_SOURCES}];
@@ -123,9 +125,9 @@ export function createMatter(detail = 110) {
         float ao = mix(0.22, 1.0, valley);
         float tube = 0.5 + 0.5 * sin(hf * 6.2831853);
         float albedo = uAlbedo * mix(0.55, 1.12, pow(tube, 0.7) * aa + (1.0 - aa) * 0.6);
-        vec3 col = vec3(albedo) * (uAmbient + diff * uKey) * ao;
+        vec3 col = uTint * albedo * (uAmbient + diff * uKey * uKeyCol) * ao;
         col += vec3(0.9, 0.92, 1.0) * sheen * uKey * 0.06 * ao;
-        col += vec3(0.5, 0.55, 0.65) * rim * 0.05;
+        col += uRimCol * rim * 0.05;
 
         // veins of light along the crests, and kindled by notes
         float region = fract(sin(dot(floor(vP * 1.6), vec3(12.9, 78.2, 37.7))) * 43758.5);

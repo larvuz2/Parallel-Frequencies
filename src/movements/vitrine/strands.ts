@@ -109,6 +109,7 @@ uniform float uWidth;
 uniform float uGrowth;
 uniform float uLayer;
 uniform float uMaxSeg;
+uniform float uSmokeWidth;
 in float aIdx;
 out float vV;
 out float vU;
@@ -161,7 +162,7 @@ void main() {
   float taper = pow(sin(3.14159265 * clamp(u * 0.92 + 0.04, 0.0, 1.0)), 0.5);
   float w = uWidth * (0.55 + 0.9 * hh(vec2(aIdx * 0.37, 5.5))) * taper;
   #ifdef WISP
-  w = uWidth * (3.0 + 5.0 * hh(vec2(aIdx * 0.37, 5.5))) * (0.5 + 2.0 * u);
+  w = uWidth * uSmokeWidth * (3.0 + 5.0 * hh(vec2(aIdx * 0.37, 5.5))) * (0.5 + 2.0 * u);
   #endif
   c0.xy += nrm * side * w / uRes * c0.w;
   gl_Position = c0;
@@ -197,6 +198,18 @@ uniform float uCrestGlow;
 uniform float uVeinShare;
 uniform float uWispAlpha;
 uniform float uTime;
+uniform vec3 uTint;
+uniform vec3 uKeyCol;
+uniform vec3 uRimCol;
+uniform vec3 uSmokeCol;
+uniform float uSmokeTint;
+uniform float uWarmShare;
+uniform float uFrontFade;
+uniform float uVeinLo;
+uniform float uVeinHi;
+uniform float uPulse;
+uniform float uToneVar;
+uniform float uSmokeBright;
 uniform vec3 uVeinA;
 uniform vec3 uVeinB;
 uniform vec3 uVeinC;
@@ -231,17 +244,17 @@ void main() {
   float rim = pow(1.0 - abs(dot(N, V)), 3.0) * uRim;
   float valley = smoothstep(-0.55, 0.45, vValley);
   float ao = mix(0.22, 1.0, valley);
-  float tone = uAlbedo * 0.85 * (0.8 + 0.4 * hh(vec2(vSeed * 0.11, 2.0)));
-  vec3 col = vec3(tone) * (uAmbient + diff * uKey) * ao * (0.62 + 0.38 * tube);
+  float tone = uAlbedo * 0.85 * (1.0 - uToneVar * 0.5 + uToneVar * hh(vec2(vSeed * 0.11, 2.0)));
+  vec3 col = uTint * tone * (uAmbient + diff * uKey * uKeyCol) * ao * (0.62 + 0.38 * tube);
   col += vec3(0.92, 0.95, 1.0) * spec * uKey * 0.3 * ao * tube;
-  col += vec3(0.5, 0.55, 0.65) * rim * 0.06 * tube;
+  col += uRimCol * rim * 0.06 * tube;
 
   // veins: a share of the strands glow where they ride over a fold crest
   float isVein = step(hh(vec2(vSeed * 0.07, 8.3)), uVeinShare);
   float region = vRegion;
   vec3 vein = region < 0.5 ? uVeinA : region < 0.68 ? uVeinB : uVeinC;
-  float crest = smoothstep(0.86, 0.98, vCrest);
-  float pulse = 0.8 + 0.2 * sin(vU * 3.0 - uTime * 0.6 + vSeed * 0.013);
+  float crest = smoothstep(uVeinLo, uVeinHi, vCrest);
+  float pulse = 1.0 - uPulse * 0.5 + uPulse * 0.5 * sin(vU * 3.0 - uTime * 0.6 + vSeed * 0.013);
   vec3 emis = vein * crest * uCrestGlow * (isVein * 2.4 + 0.03) * pulse;
   for (int i = 0; i < ${MAX_SOURCES}; i++) {
     if (i >= uNumSrc) break;
@@ -253,13 +266,13 @@ void main() {
   #ifdef WISP
   // translucent combed smoke: grey, tinted at the edges by the vein colours, fading as it drifts away
   // cool tints (lavender / cyan) with only a rare warm thread, like the reference
-  vec3 tint = hh(vec2(vSeed * 0.31, 2.2)) < 0.85 ? (hh(vec2(vSeed * 0.13, 9.1)) < 0.55 ? uVeinB : uVeinC) : uVeinA;
-  vec3 smoke = mix(vec3(0.2, 0.21, 0.23), tint * 0.6, 0.15 + 0.35 * hh(vec2(vSeed * 0.19, 6.1)));
+  vec3 tint = hh(vec2(vSeed * 0.31, 2.2)) >= uWarmShare ? (hh(vec2(vSeed * 0.13, 9.1)) < 0.55 ? uVeinB : uVeinC) : uVeinA;
+  vec3 smoke = mix(uSmokeCol, tint * 0.6, uSmokeTint * (0.3 + 0.7 * hh(vec2(vSeed * 0.19, 6.1))));
   float fade = smoothstep(0.1, 0.3, vU) * pow(1.0 - vU, 1.4);
   float a = uWispAlpha * fade * tube * tube * (0.5 + 0.5 * tube);
   // smoke reads at the silhouette; where it hangs in front of the mass it stays nearly invisible
-  a *= 1.0 - 0.85 * smoothstep(0.25, 0.85, abs(dot(N, V)));
-  fragColor = vec4((smoke * (0.6 + 0.5 * diff * uKey) + emis * 0.3) * a, a);
+  a *= 1.0 - uFrontFade * smoothstep(0.25, 0.85, abs(dot(N, V)));
+  fragColor = vec4((smoke * (0.6 + 0.5 * diff * uKey) * uSmokeBright + emis * 0.3) * a, a);
   #else
   fragColor = vec4(col + emis * (0.55 + 0.45 * tube), 1.0);
   #endif
@@ -287,7 +300,7 @@ export class Strands {
       fragmentShader: TRACE_FRAG,
       uniforms: {
         uPrevPos: { value: null }, uPrevNrm: { value: null }, uStep: { value: 0.045 }, uContour: { value: 0.6 }, uSweep: { value: 0.9 }, uWispShare: { value: 0.1 }, uWispLift: { value: 1 }, uWispTurb: { value: 1 }, uWispLen: { value: 2.5 },
-        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 },
+        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 },
         uStretch: { value: new THREE.Vector3(1.2, 1, 1) },
       },
       depthTest: false,
@@ -303,7 +316,10 @@ export class Strands {
       fragmentShader: STRAND_FRAG,
       uniforms: {
         tPos: { value: null }, tNrm: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uWidth: { value: 2 }, uGrowth: { value: 1 },
-        uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uWispShare: { value: 0.1 }, uWispAlpha: { value: 0.3 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
+        uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uWispShare: { value: 0.1 }, uWispAlpha: { value: 0.3 },
+        uTint: { value: new THREE.Color(1, 1, 1) }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
+        uSmokeCol: { value: new THREE.Color(0.2, 0.21, 0.23) }, uSmokeTint: { value: 0.5 }, uWarmShare: { value: 0.15 }, uFrontFade: { value: 0.85 },
+        uVeinLo: { value: 0.86 }, uVeinHi: { value: 0.98 }, uPulse: { value: 0.4 }, uToneVar: { value: 0.4 }, uSmokeBright: { value: 1 }, uSmokeWidth: { value: 1 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
         uGloss: { value: 40 }, uSheen: { value: 0.4 }, uRim: { value: 0.6 }, uCrestGlow: { value: 1 }, uVeinShare: { value: 0.12 }, uTime: { value: 0 },
         uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
         uNumSrc: { value: 0 }, uSrcPos: { value: [] }, uSrcForce: { value: [] }, uSrcCol: { value: [] },

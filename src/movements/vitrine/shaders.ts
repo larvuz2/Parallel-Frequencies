@@ -75,6 +75,7 @@ uniform float uWarp;
 uniform float uEvolve;
 uniform vec3 uStretch;
 uniform float uLobe;
+uniform float uLobeScale;
 
 float crestOf(vec3 p) {
   vec3 q = p * uFreq + vec3(0.0, uTime * uEvolve, uTime * uEvolve * 0.6);
@@ -89,7 +90,7 @@ float disp(vec3 p) {
   float r2 = snoise3(q * 2.3 + w * 1.6) * 0.3;
   // large lobes give the mass an irregular, cloud-like silhouette
   // large lobes — the mass is a pile of folded billows, not a ball
-  vec3 lp = p + vec3(11.3, 2.1, 5.7) + vec3(0.0, uTime * uEvolve * 0.4, 0.0);
+  vec3 lp = p * uLobeScale + vec3(11.3, 2.1, 5.7) + vec3(0.0, uTime * uEvolve * 0.4, 0.0);
   float big = snoise3(lp * 0.3);
   float mid = snoise3(lp * 0.72 + 4.0);
   float bulge = smoothstep(-0.35, 0.75, snoise3(lp * 0.55 + 9.0));   // rounded protrusions

@@ -12,7 +12,7 @@ import { createMatter } from './matter';
 import { Strands } from './strands';
 import { FIBRE_FRAG, FIBRE_VERT, GLOW_SHADER, MAX_SOURCES, NORMAL_SHADER, POSITION_SHADER, VELOCITY_SHADER } from './shaders';
 
-const FRAME = { w: 5.6, h: 2.9, d: 2.0, t: 0.11 };
+
 
 interface Source {
   pos: THREE.Vector3;
@@ -69,6 +69,13 @@ export class VitrineWorld implements MovementInstance {
   private userPitch = 0;
   private userZoom = 1;
   private woodId = '';
+  /** current frame dimensions (from the sidebar) */
+  private fd = { w: 5.6, h: 2.9, d: 2.0, t: 0.11 };
+  private frameKey = '';
+  /** the matter and everything that belongs to it — moved and turned together */
+  private mass = new THREE.Group();
+  private spinAngle = 0;
+  private unsub: () => void = () => {};
   private srcPos = Array.from({ length: MAX_SOURCES }, () => new THREE.Vector4());
   private srcForce = Array.from({ length: MAX_SOURCES }, () => new THREE.Vector4());
   private srcCol = Array.from({ length: MAX_SOURCES }, () => new THREE.Vector4());
@@ -110,8 +117,9 @@ export class VitrineWorld implements MovementInstance {
       new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.85, metalness: 0, envMapIntensity: 0.1 }),
     );
     this.floor.rotation.x = -Math.PI / 2;
-    this.floor.position.y = -FRAME.h / 2 - 0.001;
-    this.scene.add(this.frame, this.floor, this.key, this.key.target, this.fill, this.matter);
+    this.floor.position.y = -this.fd.h / 2 - 0.001;
+    this.mass.add(this.matter);
+    this.scene.add(this.frame, this.floor, this.key, this.key.target, this.fill, this.mass);
     const mu = (this.matter.material as THREE.ShaderMaterial).uniforms;
     mu.uSrcPos.value = this.srcPos;
     mu.uSrcForce.value = this.srcForce;
@@ -121,7 +129,15 @@ export class VitrineWorld implements MovementInstance {
     su.uSrcPos.value = this.srcPos;
     su.uSrcForce.value = this.srcForce;
     su.uSrcCol.value = this.srcCol;
-    this.scene.add(this.strands.mesh, this.strands.wispMesh);
+    this.mass.add(this.strands.mesh, this.strands.wispMesh);
+    // choosing a vein palette fills in the three vein colour pickers
+    this.unsub = ctx.params.onChange((k, v) => {
+      if (k !== 'vt.palette') return;
+      const pl = veinPalette(v as string);
+      ctx.params.set('vt.veinA', pl.a);
+      ctx.params.set('vt.veinB', pl.b);
+      ctx.params.set('vt.veinC', pl.c);
+    });
 
     // ---- fibres & dots
     const common = {
@@ -168,7 +184,7 @@ export class VitrineWorld implements MovementInstance {
       this.frame.remove(c);
       (c as THREE.Mesh).geometry.dispose();
     }
-    const { w, h, d, t } = FRAME;
+    const { w, h, d, t } = this.fd;
     const beam = (len: number, axis: 'x' | 'y' | 'z', x: number, y: number, z: number) => {
       const g = new THREE.BoxGeometry(len, t, t);
       const m = new THREE.Mesh(g, this.woodMat);
@@ -222,7 +238,7 @@ export class VitrineWorld implements MovementInstance {
   private buildSimulation(size: number) {
     if (this.gpu) {
       this.gpu.dispose();
-      this.scene.remove(this.fibres, this.dots);
+      this.mass.remove(this.fibres, this.dots);
       this.fibres.geometry.dispose();
       this.dots.geometry.dispose();
     }
@@ -244,7 +260,7 @@ export class VitrineWorld implements MovementInstance {
     this.gpu.setVariableDependencies(this.nrmVar, [this.posVar]);
     this.gpu.setVariableDependencies(this.glowVar, [this.posVar, this.glowVar]);
     const field = () => ({
-      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 },
+      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 },
       uStretch: { value: new THREE.Vector3(1.25, 1, 1) },
     });
     Object.assign(this.nrmVar.material.uniforms, field());
@@ -287,7 +303,7 @@ export class VitrineWorld implements MovementInstance {
     this.dots = new THREE.Points(dg, this.dotMat);
     this.dots.frustumCulled = false;
     this.dots.renderOrder = 6;
-    this.scene.add(this.fibres, this.dots);
+    this.mass.add(this.fibres, this.dots);
   }
 
   /* ------------------------------------------------------------------------- notes */
@@ -307,9 +323,8 @@ export class VitrineWorld implements MovementInstance {
     this.lastNote = this.time;
     this.phraseNotes++;
     const pos = this.surfacePoint(e.note);
-    const pal = veinPalette(p.str('vt.palette'));
     const t = pitchNorm(e.note);
-    const color = new THREE.Color(t < 0.42 ? pal.a : t < 0.66 ? pal.b : pal.c);
+    const color = new THREE.Color(p.str(t < 0.42 ? 'vt.veinA' : t < 0.66 ? 'vt.veinB' : 'vt.veinC'));
     this.sources.push({
       pos, color,
       burst: p.num('vt.swell') * modScale(m, 'swell', 0) * (0.3 + e.velocity),
@@ -394,7 +409,8 @@ export class VitrineWorld implements MovementInstance {
       u.uFreq.value = p.num('vt.foldScale');
       u.uWarp.value = p.num('vt.warp');
       u.uEvolve.value = evolve;
-      u.uStretch.value.set(p.num('vt.width'), 1, 1);
+      u.uStretch.value.set(p.num('vt.width'), p.num('vt.height'), p.num('vt.depth'));
+      u.uLobeScale.value = p.num('vt.lobeScale');
     }
     const vu = this.velVar.material.uniforms;
     vu.uDt.value = sdt;
@@ -419,7 +435,39 @@ export class VitrineWorld implements MovementInstance {
     this.gpu.compute();
 
     // ---- look
-    const pal = veinPalette(p.str('vt.palette'));
+    const pal = { a: p.str('vt.veinA'), b: p.str('vt.veinB'), c: p.str('vt.veinC') };
+    // ---- vitrine & stage
+    const fk = ['vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam'].map((k) => p.num(k).toFixed(3)).join('|');
+    if (fk !== this.frameKey) {
+      this.frameKey = fk;
+      this.fd = { w: p.num('vt.frameW'), h: p.num('vt.frameH'), d: p.num('vt.frameD'), t: p.num('vt.beam') };
+      this.buildFrame();
+      this.floor.position.y = -this.fd.h / 2 - this.fd.t / 2 - 0.001;
+    }
+    this.woodMat.color.set(p.str('vt.woodTint'));
+    this.woodMat.roughness = p.num('vt.woodRough');
+    this.woodMat.clearcoat = p.num('vt.woodCoat');
+    this.woodMat.map?.repeat.set(p.num('vt.grain'), 1);
+    const bg = new THREE.Color(p.str('vt.bgColor'));
+    (this.scene.background as THREE.Color).copy(bg);
+    const fog = this.scene.fog as THREE.Fog;
+    fog.color.copy(bg);
+    fog.near = p.num('vt.fogNear');
+    fog.far = Math.max(fog.near + 0.5, p.num('vt.fogFar'));
+    const fm = this.floor.material as THREE.MeshStandardMaterial;
+    fm.color.set(p.str('vt.floorColor'));
+    fm.roughness = p.num('vt.floorRough');
+    this.scene.environmentIntensity = p.num('vt.env');
+    this.top.color.set(p.str('vt.spotColor'));
+    this.top.angle = (p.num('vt.spotAngle') * Math.PI) / 180;
+    this.key.color.set(p.str('vt.keyColor'));
+    // ---- the mass: position and slow rotation
+    this.spinAngle += dt * p.num('vt.spin');
+    this.mass.rotation.y = this.spinAngle;
+    this.mass.position.y = p.num('vt.offsetY');
+    const tint = new THREE.Color(p.str('vt.matterColor'));
+    const keyCol = new THREE.Color(p.str('vt.keyColor'));
+    const rimCol = new THREE.Color(p.str('vt.rimColor'));
     const wood = p.str('vt.wood');
     if (wood !== this.woodId) {
       this.woodId = wood;
@@ -433,7 +481,7 @@ export class VitrineWorld implements MovementInstance {
     const keyDir = new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
     this.key.position.copy(keyDir).multiplyScalar(10);
     this.key.intensity = p.num('vt.woodLight') * 1.6;
-    this.top.intensity = p.num('vt.woodLight') * 35;
+    this.top.intensity = p.num('vt.woodLight') * 35 * p.num('vt.spot');
     this.fill.intensity = 0.15 + p.num('vt.ambient') * 0.6;
     for (const mat of [this.fibreMat, this.dotMat]) {
       const u = mat.uniforms;
@@ -460,7 +508,7 @@ export class VitrineWorld implements MovementInstance {
     // the body of the matter
     const mu = (this.matter.material as THREE.ShaderMaterial).uniforms;
     const nu = this.nrmVar.material.uniforms;
-    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe']) mu[k].value = nu[k].value;
+    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale']) mu[k].value = nu[k].value;
     mu.uStretch.value.copy(nu.uStretch.value);
     mu.uFlowScale.value = p.num('vt.flowScale');
     mu.uKeyDir.value.copy(keyDir);
@@ -468,6 +516,9 @@ export class VitrineWorld implements MovementInstance {
     mu.uAmbient.value = p.num('vt.ambient') * 0.3;
     mu.uRim.value = p.num('vt.rim');
     mu.uAlbedo.value = p.num('vt.albedo');
+    mu.uTint.value.copy(tint);
+    mu.uKeyCol.value.copy(keyCol);
+    mu.uRimCol.value.copy(rimCol);
     mu.uSheen.value = p.num('vt.sheen');
     mu.uCrestGlow.value = p.num('vt.crestGlow');
     mu.uVeinA.value.set(pal.a);
@@ -485,7 +536,7 @@ export class VitrineWorld implements MovementInstance {
     if (nStr > 0) {
       this.strands.setCount(nStr);
       const tu = this.strands.traceMat.uniforms;
-      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe']) tu[k].value = nu[k].value;
+      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale']) tu[k].value = nu[k].value;
       tu.uStretch.value.copy(nu.uStretch.value);
       tu.uStep.value = p.num('vt.strandLength') / 15;
       tu.uContour.value = p.num('vt.contour');
@@ -513,6 +564,19 @@ export class VitrineWorld implements MovementInstance {
       su.uRim.value = p.num('vt.rim');
       su.uCrestGlow.value = p.num('vt.crestGlow');
       su.uVeinShare.value = p.num('vt.veinShare');
+      su.uTint.value.copy(tint);
+      su.uKeyCol.value.copy(keyCol);
+      su.uRimCol.value.copy(rimCol);
+      su.uSmokeCol.value.set(p.str('vt.smokeColor'));
+      su.uSmokeTint.value = p.num('vt.smokeTint');
+      su.uWarmShare.value = p.num('vt.warmShare');
+      su.uFrontFade.value = p.num('vt.frontFade');
+      su.uVeinLo.value = p.num('vt.veinThreshold');
+      su.uVeinHi.value = Math.min(0.999, p.num('vt.veinThreshold') + 0.12);
+      su.uPulse.value = p.num('vt.pulse');
+      su.uToneVar.value = p.num('vt.toneVar');
+      su.uSmokeBright.value = p.num('vt.smokeBright');
+      su.uSmokeWidth.value = p.num('vt.smokeWidth');
       su.uTime.value = time;
       su.uVeinA.value.set(pal.a);
       su.uVeinB.value.set(pal.b);
@@ -547,19 +611,19 @@ export class VitrineWorld implements MovementInstance {
     if (mode === 'gallery') {
       // the museum view: frame filling the picture, a slow breathing sway
       const hfov = 2 * Math.atan(Math.tan((fov * Math.PI) / 360) * cam.aspect);
-      const fitW = (FRAME.w / 2 + 0.55) / Math.tan(hfov / 2);
-      const fitH = (FRAME.h / 2 + 0.35) / Math.tan((fov * Math.PI) / 360);
+      const fitW = (this.fd.w / 2 + 0.55) / Math.tan(hfov / 2);
+      const fitH = (this.fd.h / 2 + 0.35) / Math.tan((fov * Math.PI) / 360);
       // fit the front face of the vitrine (it is nearer the lens than the centre)
-      const dist = (Math.max(fitW, fitH) + FRAME.d / 2) * this.userZoom;
+      const dist = (Math.max(fitW, fitH) + this.fd.d / 2) * this.userZoom * p.num('vt.zoom');
       const sway = p.num('vt.sway');
       const yaw = this.userYaw + simplex3(time * 0.02, 1.1, 0) * 0.12 * sway;
-      const pitch = this.userPitch + 0.03 + simplex3(time * 0.017, 4.2, 0) * 0.04 * sway;
+      const pitch = this.userPitch + p.num('vt.camHeight') + simplex3(time * 0.017, 4.2, 0) * 0.04 * sway;
       cam.position.set(Math.sin(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist);
       cam.lookAt(0, 0, 0);
     } else {
       this.director.update({
         dt, time, mode, pace: p.num('vt.camSpeed'), closeness: 0.7, revealTime: 30, handheld: p.num('vt.sway') * 0.5, react: 0.5,
-        fov, extent: new THREE.Vector3(FRAME.w / 2, FRAME.h / 2, FRAME.d / 2), focus: this.focus, focusAxis: 1, centroid: this.centroid,
+        fov, extent: new THREE.Vector3(this.fd.w / 2, this.fd.h / 2, this.fd.d / 2), focus: this.focus, focusAxis: 1, centroid: this.centroid,
         loudness: sig.loudness, density: sig.density, pulse: sig.pulse, energy: clamp((modScale(g, 'camera', 0) - 1) * 0.8, 0, 2),
         distanceMod: 0, phraseEnded, newLine: null, lattice: [[-1.5, 0, 1.5], [-0.8, 0, 0.8], [-0.6, 0, 0.6]],
         userYaw: this.userYaw, userPitch: this.userPitch, userZoom: this.userZoom,
@@ -594,6 +658,7 @@ export class VitrineWorld implements MovementInstance {
   dispose() {
     this.ctx.renderer.domElement.removeEventListener('wheel', this.onWheel);
     window.removeEventListener('keydown', this.onKey);
+    this.unsub();
     this.gpu.dispose();
     this.fibres.geometry.dispose();
     this.dots.geometry.dispose();

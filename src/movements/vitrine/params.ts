@@ -18,16 +18,20 @@ export const VITRINE_CAMERA = [
 ];
 
 export const VITRINE_GROUPS: ParamGroup[] = [
-  { id: 'scene', label: 'Scene & camera', blurb: 'The walnut vitrine, the floor and how we look at it.' },
-  { id: 'growth', label: 'Growth', blurb: 'The mass starts empty and accumulates with the music.' },
-  { id: 'form', label: 'Form', blurb: 'The crumpled shape the matter settles into.' },
-  { id: 'flow', label: 'Flow', blurb: 'How the fibres travel across and away from the surface.', collapsed: true },
-  { id: 'fibres', label: 'Fibres', blurb: 'Count, length and density of the combed strands.', collapsed: true },
-  { id: 'light', label: 'Light', blurb: 'The soft key light, rim and fibre sheen.', collapsed: true },
-  { id: 'glow', label: 'Veins of light', blurb: 'Luminous colour along the folds and where notes land.', collapsed: true },
+  { id: 'camera', label: 'Camera', blurb: 'How we look at the vitrine.' },
+  { id: 'shape', label: 'Shape', blurb: 'Size, proportions and the folds and lobes of the mass.' },
+  { id: 'strands', label: 'Strands', blurb: 'The combed fibres that make up the surface of the matter.' },
+  { id: 'smoke', label: 'Smoke', blurb: 'Strands peeling off the edges and drifting away as smoke.' },
+  { id: 'veins', label: 'Veins of light', blurb: 'Glowing strands along the folds, and where the notes land.' },
+  { id: 'lighting', label: 'Lighting', blurb: 'Key light, rim and the highlights on the fibres.', collapsed: true },
+  { id: 'frame', label: 'Vitrine frame', blurb: 'The wooden box: size, beams and wood finish.', collapsed: true },
+  { id: 'stage', label: 'Stage', blurb: 'Background, floor, spotlight and the darkness around.', collapsed: true },
+  { id: 'growth', label: 'Growth', blurb: 'The mass starts empty and accumulates with the music.', collapsed: true },
+  { id: 'body', label: 'Body (advanced)', blurb: 'The solid surface underneath the strands.', collapsed: true },
+  { id: 'particles', label: 'Particles (advanced)', blurb: 'The GPU particle layer: loose fibres, dust and its flow.', collapsed: true },
 ];
 
-export const VITRINE_PARAMS: ParamDef[] = [
+const BASE_PARAMS: ParamDef[] = [
   /* scene */
   { key: 'vt.camera', label: 'Camera', group: 'scene', type: 'select', default: 'gallery', options: VITRINE_CAMERA, hint: 'Keys 1–7 switch live. Gallery keeps the whole vitrine in frame with a slow breathing sway.' },
   { key: 'vt.camSpeed', label: 'Camera pace', group: 'scene', type: 'range', min: 0.1, max: 3, step: 0.01, default: 0.6, format: (v) => `${x2(v)}×` },
@@ -129,6 +133,96 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.glowDecay', label: 'Glow afterlife', group: 'glow', type: 'range', min: 0.2, max: 10, step: 0.05, default: 1.8, format: sec },
   { key: 'vt.swell', label: 'Swell', group: 'glow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.35, format: x2, hint: 'Notes push the surface outward where they land.' },
 ];
+
+const NEW_PARAMS: ParamDef[] = [
+  /* camera */
+  { key: 'vt.zoom', label: 'Distance', group: 'camera', type: 'range', min: 0.4, max: 2.5, step: 0.01, default: 1, format: (v) => `${x2(v)}×`, hint: 'Gallery view: how far the camera stands (scroll also zooms).' },
+  { key: 'vt.camHeight', label: 'Eye height', group: 'camera', type: 'range', min: -0.5, max: 0.9, step: 0.01, default: 0.03, format: x2, hint: 'Gallery view: look from below, level, or from above.' },
+
+  /* shape */
+  { key: 'vt.height', label: 'Height', group: 'shape', type: 'range', min: 0.6, max: 1.6, step: 0.01, default: 1, format: (v) => `${x2(v)}×` },
+  { key: 'vt.depth', label: 'Depth', group: 'shape', type: 'range', min: 0.6, max: 1.6, step: 0.01, default: 1, format: (v) => `${x2(v)}×` },
+  { key: 'vt.lobeScale', label: 'Lobe size', group: 'shape', type: 'range', min: 0.3, max: 2.5, step: 0.01, default: 1, format: x2, hint: 'Small: a few huge lobes. Large: many smaller ones.' },
+  { key: 'vt.offsetY', label: 'Vertical position', group: 'shape', type: 'range', min: -1, max: 1, step: 0.01, default: 0, format: x2 },
+  { key: 'vt.spin', label: 'Rotation', group: 'shape', type: 'range', min: -0.4, max: 0.4, step: 0.005, default: 0, format: (v) => `${v.toFixed(3)} rad/s`, hint: 'Slowly turns the whole mass.' },
+
+  /* strands */
+  { key: 'vt.matterColor', label: 'Matter colour', group: 'strands', type: 'color', default: '#ffffff', hint: 'Tints the strands and body. White keeps the neutral grey.' },
+  { key: 'vt.toneVar', label: 'Tone variation', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0.4, format: pct, hint: 'How much individual strands differ in brightness.' },
+
+  /* smoke */
+  { key: 'vt.smokeColor', label: 'Smoke colour', group: 'smoke', type: 'color', default: '#33363b' },
+  { key: 'vt.smokeTint', label: 'Vein tint in smoke', group: 'smoke', type: 'range', min: 0, max: 1, step: 0.01, default: 0.5, format: pct, hint: 'How much the smoke takes on the vein colours.' },
+  { key: 'vt.warmShare', label: 'Warm threads', group: 'smoke', type: 'range', min: 0, max: 1, step: 0.01, default: 0.15, format: pct, hint: 'Share of smoke tinted with the first (warm) vein colour; the rest uses the cool ones.' },
+  { key: 'vt.smokeWidth', label: 'Smoke width', group: 'smoke', type: 'range', min: 0.2, max: 4, step: 0.01, default: 1, format: (v) => `${x2(v)}×` },
+  { key: 'vt.smokeBright', label: 'Smoke brightness', group: 'smoke', type: 'range', min: 0, max: 3, step: 0.01, default: 1, format: x2 },
+  { key: 'vt.frontFade', label: 'Hide smoke in front', group: 'smoke', type: 'range', min: 0, max: 1, step: 0.01, default: 0.85, format: pct, hint: 'Keeps smoke from veiling the front of the mass, so it reads mainly at the edges.' },
+
+  /* veins */
+  { key: 'vt.veinA', label: 'Vein colour — low', group: 'veins', type: 'color', default: '#ff6a55', hint: 'Choosing a palette sets these three; you can then adjust each one.' },
+  { key: 'vt.veinB', label: 'Vein colour — middle', group: 'veins', type: 'color', default: '#b39bff' },
+  { key: 'vt.veinC', label: 'Vein colour — high', group: 'veins', type: 'color', default: '#5fe2e4' },
+  { key: 'vt.veinThreshold', label: 'Vein threshold', group: 'veins', type: 'range', min: 0.5, max: 0.98, step: 0.005, default: 0.86, format: x3, hint: 'Lower: veins spread further from the fold crests.' },
+  { key: 'vt.pulse', label: 'Vein pulse', group: 'veins', type: 'range', min: 0, max: 1, step: 0.01, default: 0.4, format: pct, hint: 'Light slowly travelling along the glowing strands.' },
+
+  /* lighting */
+  { key: 'vt.keyColor', label: 'Key light colour', group: 'lighting', type: 'color', default: '#ffffff' },
+  { key: 'vt.rimColor', label: 'Rim colour', group: 'lighting', type: 'color', default: '#808ca6' },
+
+  /* frame */
+  { key: 'vt.woodTint', label: 'Wood tint', group: 'frame', type: 'color', default: '#ffffff', hint: 'Multiplies the wood colour. White = natural wood.' },
+  { key: 'vt.frameW', label: 'Width', group: 'frame', type: 'range', min: 2.5, max: 10, step: 0.05, default: 5.6, format: x2 },
+  { key: 'vt.frameH', label: 'Height', group: 'frame', type: 'range', min: 1.5, max: 6, step: 0.05, default: 2.9, format: x2 },
+  { key: 'vt.frameD', label: 'Depth', group: 'frame', type: 'range', min: 0.6, max: 5, step: 0.05, default: 2, format: x2 },
+  { key: 'vt.beam', label: 'Beam thickness', group: 'frame', type: 'range', min: 0.02, max: 0.35, step: 0.005, default: 0.11, format: x3 },
+  { key: 'vt.woodRough', label: 'Wood roughness', group: 'frame', type: 'range', min: 0, max: 1, step: 0.01, default: 0.5, format: pct },
+  { key: 'vt.woodCoat', label: 'Varnish', group: 'frame', type: 'range', min: 0, max: 1, step: 0.01, default: 0.35, format: pct },
+  { key: 'vt.grain', label: 'Grain scale', group: 'frame', type: 'range', min: 0.3, max: 4, step: 0.01, default: 1, format: (v) => `${x2(v)}×` },
+
+  /* stage */
+  { key: 'vt.bgColor', label: 'Background', group: 'stage', type: 'color', default: '#000000' },
+  { key: 'vt.floorColor', label: 'Floor colour', group: 'stage', type: 'color', default: '#0a0a0a' },
+  { key: 'vt.floorRough', label: 'Floor roughness', group: 'stage', type: 'range', min: 0, max: 1, step: 0.01, default: 0.85, format: pct, hint: 'Lower: a polished floor that reflects the light.' },
+  { key: 'vt.fogNear', label: 'Darkness starts', group: 'stage', type: 'range', min: 1, max: 30, step: 0.1, default: 7, format: x2, hint: 'Distance where the floor starts fading into the background.' },
+  { key: 'vt.fogFar', label: 'Darkness complete', group: 'stage', type: 'range', min: 2, max: 60, step: 0.1, default: 16, format: x2 },
+  { key: 'vt.spot', label: 'Spotlight', group: 'stage', type: 'range', min: 0, max: 3, step: 0.01, default: 1, format: x2, hint: 'Soft spotlight from above on the vitrine and floor.' },
+  { key: 'vt.spotColor', label: 'Spotlight colour', group: 'stage', type: 'color', default: '#fff1e0' },
+  { key: 'vt.spotAngle', label: 'Spotlight cone', group: 'stage', type: 'range', min: 10, max: 85, step: 1, default: 43, format: deg },
+  { key: 'vt.env', label: 'Reflections', group: 'stage', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.25, format: x2, hint: 'Soft room reflections on the wood and floor.' },
+];
+
+const GROUP_OF: Record<string, string> = {
+  'vt.camera': 'camera', 'vt.camSpeed': 'camera', 'vt.sway': 'camera', 'vt.fov': 'camera',
+  'vt.frame': 'frame', 'vt.wood': 'frame', 'vt.woodLight': 'frame',
+  'vt.floor': 'stage',
+  'vt.keyAz': 'lighting', 'vt.keyEl': 'lighting', 'vt.key': 'lighting', 'vt.ambient': 'lighting', 'vt.rim': 'lighting', 'vt.sheen': 'lighting', 'vt.gloss': 'lighting',
+  'vt.radius': 'shape', 'vt.width': 'shape', 'vt.lobes': 'shape', 'vt.folds': 'shape', 'vt.foldScale': 'shape', 'vt.warp': 'shape', 'vt.evolve': 'shape', 'vt.breathe': 'shape', 'vt.thickness': 'strands',
+  'vt.strands': 'strands', 'vt.strandWidth': 'strands', 'vt.strandLength': 'strands', 'vt.contour': 'strands', 'vt.sweep': 'strands', 'vt.albedo': 'strands',
+  'vt.smokeStrands': 'smoke', 'vt.smokeLength': 'smoke', 'vt.smokeLift': 'smoke', 'vt.smokeCurl': 'smoke', 'vt.smokeOpacity': 'smoke',
+  'vt.palette': 'veins', 'vt.veinShare': 'veins', 'vt.crestGlow': 'veins', 'vt.noteGlow': 'veins', 'vt.glowRadius': 'veins', 'vt.glowDecay': 'veins', 'vt.swell': 'veins',
+  'vt.body': 'body', 'vt.streaks': 'body', 'vt.strandDensity': 'body',
+  'vt.count': 'particles', 'vt.flow': 'particles', 'vt.flowScale': 'particles', 'vt.stick': 'particles', 'vt.damping': 'particles',
+  'vt.fibreLength': 'particles', 'vt.fibreOpacity': 'particles', 'vt.dotOpacity': 'particles', 'vt.dotSize': 'particles', 'vt.wisps': 'particles', 'vt.wispReach': 'particles',
+};
+
+/** Order inside each section: listed keys first (in this order), then the rest. */
+const ORDER = [
+  'vt.camera', 'vt.zoom', 'vt.camHeight', 'vt.fov', 'vt.camSpeed', 'vt.sway',
+  'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.folds', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
+  'vt.strands', 'vt.matterColor', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
+  'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade',
+  'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',
+  'vt.key', 'vt.keyColor', 'vt.keyAz', 'vt.keyEl', 'vt.ambient', 'vt.rim', 'vt.rimColor', 'vt.sheen', 'vt.gloss',
+  'vt.frame', 'vt.wood', 'vt.woodTint', 'vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.woodRough', 'vt.woodCoat', 'vt.grain', 'vt.woodLight',
+  'vt.bgColor', 'vt.floor', 'vt.floorColor', 'vt.floorRough', 'vt.fogNear', 'vt.fogFar', 'vt.spot', 'vt.spotColor', 'vt.spotAngle', 'vt.env',
+];
+
+export const VITRINE_PARAMS: ParamDef[] = [...BASE_PARAMS, ...NEW_PARAMS]
+  .map((d) => ({ ...d, group: GROUP_OF[d.key] ?? d.group }))
+  .sort((a, b) => {
+    const ia = ORDER.indexOf(a.key), ib = ORDER.indexOf(b.key);
+    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+  }) as ParamDef[];
 
 export const VITRINE_TARGETS: ModTarget[] = [
   { id: 'folds', label: 'Crumple', hint: 'Depth of the folds.' },

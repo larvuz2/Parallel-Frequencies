@@ -68,10 +68,19 @@ export function toggleControl(def: ToggleParam, store: ParamStore) {
 
 export function colorControl(def: ColorParam, store: ParamStore) {
   const input = h('input', { type: 'color', value: store.str(def.key) });
-  const row = h('div', { class: 'ctl ctl-toggle' }, h('label', { text: def.label }), input);
+  const hex = h('span', { class: 'ctl-value hex' });
+  const swatch = h('span', { class: 'color-swatch' }, input);
+  const row = h('div', { class: 'ctl ctl-color' }, h('label', { text: def.label }), h('span', { class: 'color-pick' }, hex, swatch));
+  const paint = (v: string) => {
+    hex.textContent = v.toUpperCase();
+    swatch.style.background = v;
+    if (input.value.toLowerCase() !== v.toLowerCase()) input.value = v;
+  };
   input.addEventListener('input', () => store.set(def.key, input.value));
-  store.onChange((k, v) => k === def.key && (input.value = v as string));
-  return withHint(row, def.label, def.hint);
+  row.addEventListener('dblclick', () => store.set(def.key, def.default));
+  store.onChange((k, v) => k === def.key && paint(v as string));
+  paint(store.str(def.key));
+  return withHint(row, def.label, (def.hint ? def.hint + ' ' : '') + '<i>Double-click to reset.</i>');
 }
 
 /* -------------------------------------------------------------------- dropdown */
