@@ -196,6 +196,14 @@ export class CameraDirector {
         stiffness = 0.7;
         break;
       }
+      case 'track': {
+        // stay close to a moving subject (a voice), circling it slowly
+        this.az += i.dt * 0.06 * i.pace * (1 + i.energy);
+        this.wantTarget.copy(i.focus);
+        sph(this.wantPos, this.wantTarget, this.az, (10 + 8 * Math.sin(t * 0.05)) * DEG, closeDist * 1.4);
+        stiffness = 0.75;
+        break;
+      }
       case 'still': {
         this.wantTarget.set(0, 0, 0);
         sph(this.wantPos, this.wantTarget, 45 * DEG, 30 * DEG, fullDist * 0.95);

@@ -13,7 +13,14 @@ Live movements:
   blocks of colour run along the lines like Broadway traffic. A camera director films it with
   grazing close-ups that slowly open out to reveal the whole architecture.
 
-Switch movements with the title dropdown, `M`, or `?movement=neoplasticism` in the URL.
+- **Baroque — Caravaggio × Bach (raymarched 3D).** The whole scene is a signed-distance world,
+  ray-marched per pixel. The architecture can be a golden monstrance, a pipe organ, Bernini's
+  baldacchino on twisted Solomonic columns, or fractal ornament. It is lit in chiaroscuro by one
+  window (soft shadows, ambient occlusion, god rays) and by the music: every note is a candle-light
+  travelling the spiral of its contrapuntal voice, and each voice leaves golden dust behind it.
+
+Switch movements with the title dropdown, `M`, or `?movement=baroque` / `?movement=neoplasticism`
+in the URL.
 
 ---
 
@@ -50,7 +57,7 @@ the computer-keyboard piano all work there.
 | `R` | Record video (with sound) |
 | `D` / `O` | Play demo / open file |
 | `M` | Next movement |
-| `1`–`7` | *(De Stijl)* switch camera move live |
+| `1`–`7` | *(De Stijl, Baroque)* switch camera move live |
 
 When the **computer-keyboard piano** is on, `A W S E D F T G Y H U J K` play notes, `Z`/`X` shift the
 octave and `Space` is the sustain pedal. Shortcuts then need `Shift`.
@@ -130,6 +137,25 @@ motes float in front of it, and the image is finished with bloom, vignette, grai
 Dragging always turns the view and the mouse wheel zooms, on top of any move. Forms near the lens
 dissolve so the camera can pass through them, and depth of field follows the subject.
 
+## Baroque: counterpoint in light
+
+| Music | Chapel |
+| --- | --- |
+| **Voices** | Each note joins the voice whose previous note is nearest (voice leading), or uses its MIDI channel. Voices circle on spirals in alternating directions, so their paths cross like counterpoint |
+| **Pitch** | Height of the light on its spiral; on the organ, which pipe speaks (low notes in the tall towers) |
+| **Velocity** | Brightness and size of the light |
+| **Duration** | How long the light burns; then it fades with the *afterglow* |
+| **Harmony** | The key slowly re-folds the architecture (*Harmonic morph*) |
+| **Tension** | Twists the ornament and makes the monstrance's flame-rays ripple |
+| **Dynamics** | The monstrance's sun-rays grow; the window light swells |
+| **Cadences** (loud chords) | The window flares open and recedes |
+| **Silences** | Phrase endings: the camera re-frames |
+
+The architectures are SDFs (`movements/baroque/shaders.ts`): a sunburst monstrance, a pipe organ
+whose sounding pipes glow, a baldacchino after Bernini, a KIFS folded ornament, Mandelbox chambers
+and Apollonian vaults. The march runs at reduced resolution (*Render quality → March resolution*)
+and is upscaled. The dust trails are GPU particles, occluded using the march depth.
+
 ## Architecture
 
 ```
@@ -153,6 +179,7 @@ src/
     registry.ts        all movements (Impressionism and De Stijl live, others to come)
     impressionism/     params, presets, palettes, brush system, surface, shaders, atmosphere
     neoplasticism/     De Stijl: lattice world, camera director, depth of field, Mozart demo
+    baroque/           raymarched SDF chapel, voice-lights, trails, Bach demo
   ui/                  schema-driven sidebar, dropdowns, transport bar, recorder
 ```
 
