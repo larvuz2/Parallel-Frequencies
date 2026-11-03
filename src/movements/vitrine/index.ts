@@ -19,7 +19,7 @@ export const vitrine: MovementDefinition = {
   modTargets: VITRINE_TARGETS,
   defaultRoutes: VITRINE_ROUTES,
   featured: ['vt.palette', 'vt.wood', 'vt.camera'],
-  keepOnPreset: ['vt.count'],
+  keepOnPreset: ['vt.count', 'vt.strands'],
   engineDefaults: {
     'post.tonemap': 'aces', 'post.bloom': 0.55, 'post.bloomThreshold': 0.7, 'post.bloomRadius': 0.75, 'post.drift': 0,
     'post.vignette': 0.45, 'post.grain': 0.04, 'post.exposure': 1.15,

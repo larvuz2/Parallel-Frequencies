@@ -84,9 +84,27 @@ export const VITRINE_PARAMS: ParamDef[] = [
     hint: 'More particles: finer, denser fabric (needs a stronger GPU).',
   },
   { key: 'vt.fibreLength', label: 'Fibre length', group: 'fibres', type: 'range', min: 0.005, max: 0.2, step: 0.001, default: 0.05, format: x3 },
-  { key: 'vt.fibreOpacity', label: 'Fibre density', group: 'fibres', type: 'range', min: 0, max: 1, step: 0.01, default: 0.22, format: pct },
+  { key: 'vt.fibreOpacity', label: 'Loose fibres', group: 'fibres', type: 'range', min: 0, max: 1, step: 0.01, default: 0.08, format: pct },
   { key: 'vt.dotOpacity', label: 'Dust & smoke', group: 'fibres', type: 'range', min: 0, max: 1, step: 0.01, default: 0.45, format: pct, hint: 'Fine particle dots between the strands.' },
   { key: 'vt.dotSize', label: 'Dust size', group: 'fibres', type: 'range', min: 0.2, max: 4, step: 0.01, default: 1, format: x2 },
+
+  {
+    key: 'vt.strands', label: 'Strands', group: 'fibres', type: 'select', default: '65536',
+    hint: 'Real strand geometry combed along the folds. More strands: a denser, finer fabric (and more GPU work).',
+    options: [
+      { value: '0', label: 'Off' },
+      { value: '16384', label: '16 thousand' },
+      { value: '32768', label: '33 thousand' },
+      { value: '65536', label: '65 thousand' },
+      { value: '131072', label: '131 thousand' },
+    ],
+  },
+  { key: 'vt.strandWidth', label: 'Strand width', group: 'fibres', type: 'range', min: 0.5, max: 8, step: 0.05, default: 2.6, format: (v) => `${x2(v)} px` },
+  { key: 'vt.strandLength', label: 'Strand length', group: 'fibres', type: 'range', min: 0.1, max: 2, step: 0.01, default: 0.7, format: x2 },
+  { key: 'vt.contour', label: 'Follow the folds', group: 'fibres', type: 'range', min: 0, max: 2, step: 0.01, default: 0.7, format: x2, hint: 'How much strands bend to run along the folds rather than straight across them.' },
+  { key: 'vt.sweep', label: 'Comb waviness', group: 'fibres', type: 'range', min: 0, max: 2, step: 0.01, default: 0.9, format: x2, hint: 'How much the overall combing direction wanders across the form.' },
+  { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.14, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
+  { key: 'vt.gloss', label: 'Strand gloss', group: 'light', type: 'range', min: 4, max: 120, step: 1, default: 36 },
 
   /* light */
   { key: 'vt.key', label: 'Key light', group: 'light', type: 'range', min: 0, max: 3, step: 0.01, default: 0.95, format: x2 },

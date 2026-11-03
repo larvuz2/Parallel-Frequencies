@@ -9,6 +9,7 @@ import { CameraDirector } from '../neoplasticism/CameraDirector';
 import { VITRINE_CAMERA } from './params';
 import { veinPalette, WOODS } from './palettes';
 import { createMatter } from './matter';
+import { Strands } from './strands';
 import { FIBRE_FRAG, FIBRE_VERT, GLOW_SHADER, MAX_SOURCES, NORMAL_SHADER, POSITION_SHADER, VELOCITY_SHADER } from './shaders';
 
 const FRAME = { w: 5.6, h: 2.9, d: 2.0, t: 0.11 };
@@ -47,6 +48,7 @@ export class VitrineWorld implements MovementInstance {
   private dotMat: THREE.ShaderMaterial;
   private frame = new THREE.Group();
   private matter = createMatter();
+  private strands: Strands;
   private woodMat: THREE.MeshPhysicalMaterial;
   private floor: THREE.Mesh;
   private key = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -114,6 +116,12 @@ export class VitrineWorld implements MovementInstance {
     mu.uSrcPos.value = this.srcPos;
     mu.uSrcForce.value = this.srcForce;
     mu.uSrcCol.value = this.srcCol;
+    this.strands = new Strands(r, parseInt(ctx.params.str('vt.strands'), 10) || 16384);
+    const su = this.strands.material.uniforms;
+    su.uSrcPos.value = this.srcPos;
+    su.uSrcForce.value = this.srcForce;
+    su.uSrcCol.value = this.srcCol;
+    this.scene.add(this.strands.mesh);
 
     // ---- fibres & dots
     const common = {
@@ -469,6 +477,43 @@ export class VitrineWorld implements MovementInstance {
     mu.uNumSrc.value = live.length;
     this.matter.visible = p.bool('vt.body');
 
+    // the strands
+    const nStr = parseInt(p.str('vt.strands'), 10) || 0;
+    this.strands.mesh.visible = nStr > 0;
+    if (nStr > 0) {
+      this.strands.setCount(nStr);
+      const tu = this.strands.traceMat.uniforms;
+      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve']) tu[k].value = nu[k].value;
+      tu.uStretch.value.copy(nu.uStretch.value);
+      tu.uStep.value = p.num('vt.strandLength') / 15;
+      tu.uContour.value = p.num('vt.contour');
+      tu.uSweep.value = p.num('vt.sweep');
+      this.strands.trace();
+      const su = this.strands.material.uniforms;
+      su.uRes.value.set(this.width, this.height);
+      su.uWidth.value = p.num('vt.strandWidth') * (this.height / 1080);
+      su.uGrowth.value = this.spawned;
+      su.uLayer.value = p.num('vt.thickness') * 0.15;
+      su.uKeyDir.value.copy(keyDir);
+      su.uKey.value = mu.uKey.value;
+      su.uAmbient.value = p.num('vt.ambient') * 0.3;
+      su.uAlbedo.value = p.num('vt.albedo') * 1.15;
+      su.uGloss.value = p.num('vt.gloss');
+      su.uSheen.value = p.num('vt.sheen') * 1.4;
+      su.uRim.value = p.num('vt.rim');
+      su.uCrestGlow.value = p.num('vt.crestGlow');
+      su.uVeinShare.value = p.num('vt.veinShare');
+      su.uTime.value = time;
+      su.uVeinA.value.set(pal.a);
+      su.uVeinB.value.set(pal.b);
+      su.uVeinC.value.set(pal.c);
+      su.uNumSrc.value = live.length;
+      // with strands on, the body underneath is a dark filler between them
+      mu.uStreak.value *= 0.35;
+      mu.uCrestGlow.value *= 0.35;
+      mu.uAlbedo.value *= 0.7;
+    }
+
     // more particles → each one fainter, so the mass keeps its density
     const norm = Math.sqrt(262144 / (count * count));
     this.fibreMat.uniforms.uOpacity.value = p.num('vt.fibreOpacity') * norm;
@@ -543,6 +588,7 @@ export class VitrineWorld implements MovementInstance {
     this.fibres.geometry.dispose();
     this.dots.geometry.dispose();
     this.matter.geometry.dispose();
+    this.strands.dispose();
     (this.matter.material as THREE.Material).dispose();
     this.fibreMat.dispose();
     this.dotMat.dispose();
