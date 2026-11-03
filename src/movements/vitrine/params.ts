@@ -51,10 +51,10 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0006, format: (v) => `${(v * 100).toFixed(2)}%/s` },
 
   /* form */
-  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.02, format: x2 },
+  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.1, format: x2 },
   { key: 'vt.width', label: 'Width', group: 'form', type: 'range', min: 0.8, max: 1.8, step: 0.01, default: 1.05, format: (v) => `${x2(v)}×` },
   { key: 'vt.folds', label: 'Crumple', group: 'form', type: 'range', min: 0, max: 1.2, step: 0.01, default: 0.45, format: x2, hint: 'Depth of the folds. Loudness deepens them (see Mapping).' },
-  { key: 'vt.lobes', label: 'Lobes', group: 'form', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.75, format: x2, hint: 'Large billowing lobes that break the round silhouette. 0 = a ball.' },
+  { key: 'vt.lobes', label: 'Lobes', group: 'form', type: 'range', min: 0, max: 1.5, step: 0.01, default: 1.1, format: x2, hint: 'Large billowing lobes that break the round silhouette. 0 = a ball.' },
   { key: 'vt.breathe', label: 'Breathing', group: 'form', type: 'range', min: 0, max: 2, step: 0.01, default: 1, format: x2, hint: 'The whole mass expands a little with loudness and slowly breathes.' },
   { key: 'vt.foldScale', label: 'Fold size', group: 'form', type: 'range', min: 0.3, max: 2.5, step: 0.01, default: 1.2, format: x2, hint: 'Small values: a few large folds. Large values: many small creases.' },
   { key: 'vt.warp', label: 'Twist of folds', group: 'form', type: 'range', min: 0, max: 2, step: 0.01, default: 0.9, format: x2 },
@@ -87,7 +87,7 @@ export const VITRINE_PARAMS: ParamDef[] = [
   },
   { key: 'vt.fibreLength', label: 'Fibre length', group: 'fibres', type: 'range', min: 0.005, max: 0.2, step: 0.001, default: 0.05, format: x3 },
   { key: 'vt.fibreOpacity', label: 'Loose fibres', group: 'fibres', type: 'range', min: 0, max: 1, step: 0.01, default: 0.08, format: pct },
-  { key: 'vt.dotOpacity', label: 'Dust & smoke', group: 'fibres', type: 'range', min: 0, max: 1, step: 0.01, default: 0.45, format: pct, hint: 'Fine particle dots between the strands.' },
+  { key: 'vt.dotOpacity', label: 'Dust & smoke', group: 'fibres', type: 'range', min: 0, max: 1, step: 0.01, default: 0.12, format: pct, hint: 'Fine particle dots between the strands.' },
   { key: 'vt.dotSize', label: 'Dust size', group: 'fibres', type: 'range', min: 0.2, max: 4, step: 0.01, default: 1, format: x2 },
 
   {
@@ -108,11 +108,11 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.17, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
   { key: 'vt.gloss', label: 'Strand gloss', group: 'light', type: 'range', min: 4, max: 120, step: 1, default: 36 },
 
-  { key: 'vt.smokeStrands', label: 'Smoke strands', group: 'form', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.07, format: pct, hint: 'Share of strands (in some regions) that peel off the surface and drift away as combed smoke.' },
+  { key: 'vt.smokeStrands', label: 'Smoke strands', group: 'form', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.1, format: pct, hint: 'Share of strands (in some regions) that peel off the surface and drift away as combed smoke.' },
   { key: 'vt.smokeLength', label: 'Smoke reach', group: 'form', type: 'range', min: 0.5, max: 6, step: 0.05, default: 1.7, format: x2 },
   { key: 'vt.smokeLift', label: 'Smoke lift', group: 'form', type: 'range', min: 0, max: 2, step: 0.01, default: 0.7, format: x2, hint: 'How steeply smoke leaves the surface.' },
   { key: 'vt.smokeCurl', label: 'Smoke curl', group: 'form', type: 'range', min: 0, max: 3, step: 0.01, default: 1.1, format: x2 },
-  { key: 'vt.smokeOpacity', label: 'Smoke opacity', group: 'form', type: 'range', min: 0, max: 1, step: 0.01, default: 0.1, format: pct },
+  { key: 'vt.smokeOpacity', label: 'Smoke opacity', group: 'form', type: 'range', min: 0, max: 1, step: 0.01, default: 0.16, format: pct },
 
   /* light */
   { key: 'vt.key', label: 'Key light', group: 'light', type: 'range', min: 0, max: 3, step: 0.01, default: 0.95, format: x2 },
