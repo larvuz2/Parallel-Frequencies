@@ -16,6 +16,11 @@ export const K = 16;
 const COLS = 16;
 
 const SEED = /* glsl */ `
+uniform float uWispShare;
+bool isWisp(float si, vec3 d0) {
+  // smoke leaves from some regions only, a share of the strands there
+  return snoise3(d0 * 1.3 + 7.7) > -0.05 && hh(vec2(si * 0.053, 4.4)) < uWispShare * 2.0;
+}
 vec3 seedDir(float si) {
   float u = hh(vec2(si * 0.0131, 7.1)) * 2.0 - 1.0;
   float a = hh(vec2(si * 0.0173, 3.3)) * 6.2831853;
@@ -35,6 +40,9 @@ uniform sampler2D uPrevNrm;
 uniform float uStep;
 uniform float uContour;
 uniform float uSweep;
+uniform float uWispLift;
+uniform float uWispTurb;
+uniform float uWispLen;
 layout(location = 0) out vec4 oPos;
 layout(location = 1) out vec4 oNrm;
 
@@ -61,6 +69,16 @@ void main() {
       vec3 cont = cross(pn, rad);
       cont *= sign(dot(cont, t) + 1e-5);
       t = normalize(t + cont * uContour * 6.0 + 1e-5);
+      if (k >= 3 && isWisp(si, seedDir(si))) {
+        // smoke: the strand peels off the surface and drifts, curling, into the air
+        float f = float(k - 2) / ${(K - 3).toFixed(1)};
+        vec3 cu = curl3(q0 * 0.9 + vec3(0.0, uTime * 0.04, uTime * 0.02));
+        vec3 outward = normalize(rad * uStretch);
+        vec3 dv = normalize(t * (1.0 - 0.4 * f) + (pn * 0.6 + outward * 0.4) * uWispLift * (0.4 + f) + cu * uWispTurb * 0.25 + vec3(0.0, 0.12, 0.0));
+        oPos = vec4(q0 + dv * uStep * uWispLen, prev.w * 0.92);
+        oNrm = vec4(pn, 1.0);
+        return;
+      }
       d = normalize((q0 + t * uStep) / uStretch);
     }
   }
@@ -120,6 +138,12 @@ void main() {
   float m = 0.5 + 0.5 * snoise3(d0 * 1.8 + 3.0);
   float edge = uGrowth * 1.15 - m;
   float reach = clamp(edge / 0.15, 0.0, 1.0);
+  bool wisp = isWisp(aIdx, d0);
+  #ifdef WISP
+  if (!wisp) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+  #else
+  if (wisp && k >= 3) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+  #endif
   if (edge <= 0.0 || u > reach || dot(Nn.xyz, Nn.xyz) < 0.5 || dot(T, T) < 1e-10 || length(T) > uMaxSeg) {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     return;
@@ -136,6 +160,9 @@ void main() {
   vec2 nrm = vec2(-dir.y, dir.x);
   float taper = pow(sin(3.14159265 * clamp(u * 0.92 + 0.04, 0.0, 1.0)), 0.5);
   float w = uWidth * (0.55 + 0.9 * hh(vec2(aIdx * 0.37, 5.5))) * taper;
+  #ifdef WISP
+  w = uWidth * (1.2 + 2.0 * hh(vec2(aIdx * 0.37, 5.5))) * (0.6 + 1.4 * u);
+  #endif
   c0.xy += nrm * side * w / uRes * c0.w;
   gl_Position = c0;
   vV = side;
@@ -168,6 +195,7 @@ uniform float uSheen;
 uniform float uRim;
 uniform float uCrestGlow;
 uniform float uVeinShare;
+uniform float uWispAlpha;
 uniform float uTime;
 uniform vec3 uVeinA;
 uniform vec3 uVeinB;
@@ -222,12 +250,22 @@ void main() {
     float fall = exp(-dot(dd, dd) / (r * r));
     emis += uSrcCol[i].rgb * uSrcCol[i].a * fall * (0.04 + isVein * 1.3 + crest * 0.3);
   }
+  #ifdef WISP
+  // translucent combed smoke: grey, tinted at the edges by the vein colours, fading as it drifts away
+  vec3 smoke = mix(vec3(0.16, 0.17, 0.19), vein * 0.75, 0.25 + 0.45 * hh(vec2(vSeed * 0.19, 6.1)));
+  float fade = smoothstep(0.1, 0.3, vU) * pow(1.0 - vU, 1.4);
+  float a = uWispAlpha * fade * tube * tube;
+  fragColor = vec4((smoke * (0.6 + 0.5 * diff * uKey) + emis * 0.3) * a, a);
+  #else
   fragColor = vec4(col + emis * (0.55 + 0.45 * tube), 1.0);
+  #endif
 }
 `;
 
 export class Strands {
   readonly mesh: THREE.Mesh;
+  readonly wispMesh: THREE.Mesh;
+  readonly wispMaterial: THREE.ShaderMaterial;
   readonly material: THREE.ShaderMaterial;
   readonly traceMat: THREE.RawShaderMaterial;
   private a!: THREE.WebGLRenderTarget;
@@ -244,8 +282,8 @@ export class Strands {
       vertexShader: FULLSCREEN_VERT,
       fragmentShader: TRACE_FRAG,
       uniforms: {
-        uPrevPos: { value: null }, uPrevNrm: { value: null }, uStep: { value: 0.045 }, uContour: { value: 0.6 }, uSweep: { value: 0.9 },
-        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 },
+        uPrevPos: { value: null }, uPrevNrm: { value: null }, uStep: { value: 0.045 }, uContour: { value: 0.6 }, uSweep: { value: 0.9 }, uWispShare: { value: 0.1 }, uWispLift: { value: 1 }, uWispTurb: { value: 1 }, uWispLen: { value: 2.5 },
+        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 },
         uStretch: { value: new THREE.Vector3(1.2, 1, 1) },
       },
       depthTest: false,
@@ -261,7 +299,7 @@ export class Strands {
       fragmentShader: STRAND_FRAG,
       uniforms: {
         tPos: { value: null }, tNrm: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uWidth: { value: 2 }, uGrowth: { value: 1 },
-        uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
+        uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uWispShare: { value: 0.1 }, uWispAlpha: { value: 0.3 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
         uGloss: { value: 40 }, uSheen: { value: 0.4 }, uRim: { value: 0.6 }, uCrestGlow: { value: 1 }, uVeinShare: { value: 0.12 }, uTime: { value: 0 },
         uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
         uNumSrc: { value: 0 }, uSrcPos: { value: [] }, uSrcForce: { value: [] }, uSrcCol: { value: [] },
@@ -285,6 +323,23 @@ export class Strands {
     this.geometry = g;
     this.mesh = new THREE.Mesh(g, this.material);
     this.mesh.frustumCulled = false;
+    // the smoke: same strands, translucent, drawn after the solid matter
+    this.wispMaterial = new THREE.ShaderMaterial({
+      glslVersion: THREE.GLSL3,
+      vertexShader: STRAND_VERT,
+      fragmentShader: STRAND_FRAG,
+      uniforms: this.material.uniforms,
+      defines: { WISP: '' },
+      side: THREE.DoubleSide,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.CustomBlending,
+      blendSrc: THREE.OneFactor,
+      blendDst: THREE.OneMinusSrcAlphaFactor,
+    });
+    this.wispMesh = new THREE.Mesh(g, this.wispMaterial);
+    this.wispMesh.frustumCulled = false;
+    this.wispMesh.renderOrder = 8;
     this.setCount(count);
   }
 
@@ -342,6 +397,7 @@ export class Strands {
     this.b.dispose();
     this.geometry.dispose();
     this.material.dispose();
+    this.wispMaterial.dispose();
     this.traceMat.dispose();
   }
 }

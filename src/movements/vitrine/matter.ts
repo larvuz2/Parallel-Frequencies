@@ -15,7 +15,7 @@ export function createMatter(detail = 110) {
   g = mergeVertices(g);
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      uTime: { value: 0 }, uR: { value: 1.12 }, uAmp: { value: 0.55 }, uFreq: { value: 0.95 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.025 },
+      uTime: { value: 0 }, uR: { value: 1.12 }, uAmp: { value: 0.55 }, uFreq: { value: 0.95 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.025 }, uLobe: { value: 0.6 },
       uStretch: { value: new THREE.Vector3(1.22, 1, 1) }, uFlowScale: { value: 1.5 },
       uKeyDir: { value: new THREE.Vector3(-0.4, 0.7, 0.5).normalize() }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uRim: { value: 0.6 },
       uAlbedo: { value: 0.2 }, uSheen: { value: 0.5 }, uCrestGlow: { value: 0.9 },

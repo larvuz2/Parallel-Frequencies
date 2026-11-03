@@ -121,7 +121,7 @@ export class VitrineWorld implements MovementInstance {
     su.uSrcPos.value = this.srcPos;
     su.uSrcForce.value = this.srcForce;
     su.uSrcCol.value = this.srcCol;
-    this.scene.add(this.strands.mesh);
+    this.scene.add(this.strands.mesh, this.strands.wispMesh);
 
     // ---- fibres & dots
     const common = {
@@ -244,7 +244,7 @@ export class VitrineWorld implements MovementInstance {
     this.gpu.setVariableDependencies(this.nrmVar, [this.posVar]);
     this.gpu.setVariableDependencies(this.glowVar, [this.posVar, this.glowVar]);
     const field = () => ({
-      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 },
+      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 },
       uStretch: { value: new THREE.Vector3(1.25, 1, 1) },
     });
     Object.assign(this.nrmVar.material.uniforms, field());
@@ -387,7 +387,9 @@ export class VitrineWorld implements MovementInstance {
     for (const v of [this.posVar, this.nrmVar]) {
       const u = v.material.uniforms;
       u.uTime.value = time;
-      u.uR.value = p.num('vt.radius');
+      // the whole mass breathes and expands a little with the music
+      u.uR.value = p.num('vt.radius') * (1 + p.num('vt.breathe') * (0.07 * sig.loudness + 0.012 * Math.sin(time * 0.35)));
+      u.uLobe.value = p.num('vt.lobes');
       u.uAmp.value = p.num('vt.folds') * modScale(g, 'folds', 0.1);
       u.uFreq.value = p.num('vt.foldScale');
       u.uWarp.value = p.num('vt.warp');
@@ -458,7 +460,7 @@ export class VitrineWorld implements MovementInstance {
     // the body of the matter
     const mu = (this.matter.material as THREE.ShaderMaterial).uniforms;
     const nu = this.nrmVar.material.uniforms;
-    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve']) mu[k].value = nu[k].value;
+    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe']) mu[k].value = nu[k].value;
     mu.uStretch.value.copy(nu.uStretch.value);
     mu.uFlowScale.value = p.num('vt.flowScale');
     mu.uKeyDir.value.copy(keyDir);
@@ -483,18 +485,25 @@ export class VitrineWorld implements MovementInstance {
     if (nStr > 0) {
       this.strands.setCount(nStr);
       const tu = this.strands.traceMat.uniforms;
-      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve']) tu[k].value = nu[k].value;
+      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe']) tu[k].value = nu[k].value;
       tu.uStretch.value.copy(nu.uStretch.value);
       tu.uStep.value = p.num('vt.strandLength') / 15;
       tu.uContour.value = p.num('vt.contour');
       tu.uSweep.value = p.num('vt.sweep');
+      tu.uWispShare.value = p.num('vt.smokeStrands');
+      tu.uWispLift.value = p.num('vt.smokeLift');
+      tu.uWispTurb.value = p.num('vt.smokeCurl') * modScale(g, 'wisps', 0.2);
+      tu.uWispLen.value = p.num('vt.smokeLength');
       this.strands.trace();
       const su = this.strands.material.uniforms;
       su.uRes.value.set(this.width, this.height);
       su.uWidth.value = p.num('vt.strandWidth') * (this.height / 1080);
       su.uGrowth.value = this.spawned;
       su.uLayer.value = p.num('vt.thickness') * 0.15;
-      su.uMaxSeg.value = (p.num('vt.strandLength') / 15) * 2.5;
+      su.uMaxSeg.value = (p.num('vt.strandLength') / 15) * Math.max(2.5, p.num('vt.smokeLength') * 1.8);
+      su.uWispShare.value = tu.uWispShare.value;
+      su.uWispAlpha.value = p.num('vt.smokeOpacity');
+      this.strands.wispMesh.visible = p.num('vt.smokeStrands') > 0.001;
       su.uKeyDir.value.copy(keyDir);
       su.uKey.value = mu.uKey.value * 1.25;
       su.uAmbient.value = p.num('vt.ambient') * 0.3;
