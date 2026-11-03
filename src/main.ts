@@ -1,3 +1,10 @@
+import '@fontsource/cormorant-garamond/400.css';
+import '@fontsource/cormorant-garamond/400-italic.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/500-italic.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
 import './styles.css';
 import { Engine } from './core/Engine';
 import { ParamStore } from './core/ParamStore';
@@ -73,7 +80,14 @@ class App implements AppApi {
     );
     this.sidebar = new Sidebar(this);
     const reopen = iconButton(ICONS.panel, 'Show panel (H)', () => this.toggleSidebar(), 'reopen');
-    root.append(this.hud, this.sidebar.el, this.bar.el, reopen, this.toastEl, this.statsEl, this.dropOverlay());
+    const welcome = h(
+      'div',
+      { class: 'welcome' },
+      h('div', { class: 'w-line', text: 'Play a note, drop a score or a recording —' }),
+      h('div', { class: 'w-sub', text: 'or press D to hear Rêverie' }),
+    );
+    const off = this.engine.bus.subscribe({ noteOn: () => { welcome.classList.add('gone'); off(); } });
+    root.append(this.hud, welcome, this.sidebar.el, this.bar.el, reopen, this.toastEl, this.statsEl, this.dropOverlay());
     this.bar.onClose = () => this.setTransport(null);
 
     this.wireInputs();
@@ -82,6 +96,8 @@ class App implements AppApi {
     this.engine.onFrame(() => this.frame());
     this.engine.start();
     if (localStorage.getItem('pf:sb-hidden') === '1') document.body.classList.add('sb-hidden');
+    // handy for debugging from the console: pf.params.set('im.size', 0.03)
+    (window as unknown as { pf: App }).pf = this;
   }
 
   get signals() {
@@ -134,6 +150,19 @@ class App implements AppApi {
       if (k === 'quality.fps') this.statsEl.classList.toggle('hidden', !v);
     });
     this.statsEl.classList.toggle('hidden', !this.params.bool('quality.fps'));
+
+    // text drawn over the canvas adapts to the brightness of the ground
+    const tone = () => {
+      const opt = this.params.def('im.groundTone');
+      const cur = this.params.v['im.groundTone'];
+      const hex = opt?.type === 'select' ? opt.options.find((o) => o.value === cur)?.swatches?.[0] : undefined;
+      if (!hex) return;
+      const n = parseInt(hex.slice(1), 16);
+      const lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+      document.body.classList.toggle('dark-ground', lum < 0.45);
+    };
+    this.params.onChange((k) => k === 'im.groundTone' && tone());
+    tone();
   }
 
   midiStatus() {
@@ -147,9 +176,7 @@ class App implements AppApi {
   /* ---------------------------------------------------------------- files */
 
   openFile() {
-    const input = h('input', { type: 'file', accept: '.mid,.midi,audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac' });
-    input.addEventListener('change', () => input.files?.[0] && this.loadFile(input.files[0]));
-    input.click();
+    pickFile('.mid,.midi,audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac', (f) => this.loadFile(f));
   }
 
   async loadFile(file: File) {
@@ -254,7 +281,12 @@ class App implements AppApi {
     const { builtIn, saved } = this.presets();
     const p = [...builtIn, ...saved].find((x) => x.id === id);
     if (!p) return;
-    this.params.applyPreset(p, 1.6);
+    // a preset is a complete look: unspecified style parameters return to their defaults,
+    // while installation preferences (touch, pointer light, weave density, atmosphere on/off) stay
+    const keep = new Set(['im.touch', 'im.touchPaint', 'im.pointerLight', 'im.atmosphere', 'im.groundDensity', 'im.touchRadius', 'im.touchStrength']);
+    const values: ParamValues = {};
+    for (const d of this.movement.params ?? []) if (!keep.has(d.key)) values[d.key] = d.default;
+    this.params.applyPreset({ ...p, values: { ...values, ...p.values } }, 1.6);
     this.presetId = id;
     localStorage.setItem(`pf:preset:${this.movement.id}`, id);
     this.sidebar.refreshPresets();
@@ -351,10 +383,7 @@ class App implements AppApi {
   }
 
   importSettings() {
-    const input = h('input', { type: 'file', accept: '.json,application/json' });
-    input.addEventListener('change', async () => {
-      const f = input.files?.[0];
-      if (!f) return;
+    pickFile('.json,application/json', async (f) => {
       try {
         const data = JSON.parse(await f.text()) as { values?: ParamValues; routes?: ModRoute[]; saved?: Preset[] };
         if (data.values) this.params.apply(data.values, 1);
@@ -370,7 +399,6 @@ class App implements AppApi {
         this.toast('That file could not be read.');
       }
     });
-    input.click();
   }
 
   resetAll() {
@@ -506,6 +534,19 @@ class App implements AppApi {
     window.addEventListener('pointerdown', wake);
     wake();
   }
+}
+
+/** File picker that works everywhere (Safari needs the input attached to the document). */
+function pickFile(accept: string, onFile: (f: File) => void) {
+  const input = h('input', { type: 'file', accept, style: 'position:fixed;left:-9999px;opacity:0' });
+  document.body.append(input);
+  input.addEventListener('change', () => {
+    const f = input.files?.[0];
+    input.remove();
+    if (f) onFile(f);
+  });
+  input.click();
+  window.setTimeout(() => input.isConnected && !input.files?.length && input.remove(), 120000);
 }
 
 const stamp = () => new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');

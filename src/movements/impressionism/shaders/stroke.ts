@@ -1,4 +1,4 @@
-import { GROUND_GLSL, NOISE_GLSL } from '../../../shaders/common';
+import { NOISE_GLSL } from '../../../shaders/common';
 
 /**
  * Brush-stroke ribbon shader.
@@ -81,7 +81,6 @@ void main() {
 export const STROKE_FRAG = /* glsl */ `
 precision highp float;
 ${NOISE_GLSL}
-${GROUND_GLSL}
 
 in vec2 vC;
 in float vAcross;
@@ -97,15 +96,13 @@ in float vCapD;
 
 uniform sampler2D uPrevPaint;
 uniform sampler2D uPrevHeight;
+uniform sampler2D uGroundTex;
 uniform float uAspect;
-uniform int uGround;
-uniform float uGroundDensity;
 uniform float uBristleContrast;
 uniform float uEdgeRough;
 uniform float uDryBrush;
 uniform float uBrokenColor;
 uniform float uHeightCarry;
-uniform float uPxPerUnit;
 
 layout(location = 0) out vec4 oPaint;
 layout(location = 1) out vec4 oHeight;
@@ -151,9 +148,9 @@ void main() {
   if (type == 3) streak = mix(streak, 0.75, 0.5);                     // dab: dense, short
 
   // ---- paint load / dry brush --------------------------------------------------------------------
-  float tooth = groundTooth(vC, uGround, uGroundDensity, uPxPerUnit);
   // existing relief also catches paint (dragging over old impasto ridges)
   vec2 suv = vec2(vC.x / uAspect, vC.y);
+  float tooth = texture(uGroundTex, suv).r;
   vec4 under = texture(uPrevPaint, suv);
   vec4 underH = texture(uPrevHeight, suv);
   float relief = clamp(tooth * 0.6 + underH.r * 0.8, 0.0, 1.5);

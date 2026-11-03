@@ -34,6 +34,19 @@ body.idle .stage-canvas, body.idle.perform * { cursor: none !important; }
 .hud-sub { margin-top: 6px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255, 252, 245, 0.55); }
 body.idle .hud, body.perform .hud { opacity: 0; }
 
+.welcome {
+  position: fixed; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none;
+  color: rgba(40, 38, 34, 0.55); transition: opacity 2.4s var(--ease); z-index: 1;
+}
+body:not(.sb-hidden):not(.perform) .welcome { right: calc(var(--sb-w) + 24px); }
+.welcome .w-line { font: italic 400 30px/1.2 var(--serif); }
+.welcome .w-sub { margin-top: 10px; font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; }
+.welcome.gone, body.perform .welcome { opacity: 0; }
+body.dark-ground .welcome { color: rgba(240, 236, 228, 0.6); }
+body:not(.dark-ground) .hud-title { color: rgba(30, 28, 25, 0.78); }
+body:not(.dark-ground) .hud-sub { color: rgba(30, 28, 25, 0.5); }
+body:not(.dark-ground) .hud { text-shadow: 0 1px 14px rgba(255, 255, 255, 0.35); }
+
 /* ------------------------------------------------------------------ sidebar */
 .sidebar {
   position: fixed; top: 12px; right: 12px; bottom: 12px; width: var(--sb-w);

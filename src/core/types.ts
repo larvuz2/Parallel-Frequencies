@@ -148,9 +148,12 @@ export interface PointerState {
   /** canvas uv 0–1, y up */
   x: number;
   y: number;
-  /** uv per second */
+  /** uv per second (derived each frame from the exact movement since the last frame) */
   vx: number;
   vy: number;
+  /** movement accumulated since the last frame (internal) */
+  ax: number;
+  ay: number;
   down: boolean;
   active: boolean;
 }

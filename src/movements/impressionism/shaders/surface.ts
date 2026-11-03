@@ -1,5 +1,22 @@
 import { GROUND_GLSL, NOISE_GLSL } from '../../../shaders/common';
 
+/** Bakes the ground relief (canvas weave / paper / gesso) into a texture whenever it changes. */
+export const GROUND_FRAG = /* glsl */ `
+precision highp float;
+${NOISE_GLSL}
+${GROUND_GLSL}
+in vec2 vUv;
+uniform float uAspect;
+uniform int uGround;
+uniform float uGroundDensity;
+uniform float uPxPerUnit;
+out vec4 oColor;
+void main() {
+  vec2 c = vec2(vUv.x * uAspect, vUv.y);
+  oColor = vec4(groundTooth(c, uGround, uGroundDensity, uPxPerUnit), 0.0, 0.0, 1.0);
+}
+`;
+
 /**
  * Surface process pass — runs once per frame, ping-ponging the paint + height buffers.
  *  - touch smudging (pointers drag wet paint, push up ridges)
@@ -96,15 +113,13 @@ void main() {
 export const COMPOSITE_FRAG = /* glsl */ `
 precision highp float;
 ${NOISE_GLSL}
-${GROUND_GLSL}
 in vec2 vUv;
 uniform sampler2D uPaint;
 uniform sampler2D uHeight;
+uniform sampler2D uGroundTex;
 uniform vec2 uTexel;
 uniform float uAspect;
 uniform float uTime;
-uniform int uGround;
-uniform float uGroundDensity;
 uniform vec3 uGroundColor;
 uniform float uGroundRelief;
 uniform vec3 uLightDir;
@@ -122,14 +137,13 @@ uniform float uContrast;
 uniform float uExposure;
 uniform float uWarmth;
 uniform float uBreath;
-uniform float uPxPerUnit;
 
 out vec4 oColor;
 
 vec3 toLinear(vec3 c) { return pow(max(c, 0.0), vec3(2.2)); }
 
-float surfaceH(vec2 uv, vec2 c, float paintA) {
-  float tooth = groundTooth(c, uGround, uGroundDensity, uPxPerUnit);
+float surfaceH(vec2 uv, float paintA) {
+  float tooth = texture(uGroundTex, uv).r;
   float ph = texture(uHeight, uv).r;
   // thick paint buries the weave; thin scumbles let it read through
   return ph + tooth * uGroundRelief * (1.0 - smoothstep(0.0, 0.35, ph) * 0.85) * (1.0 - paintA * 0.35);
@@ -141,7 +155,7 @@ void main() {
   vec4 paint = texture(uPaint, uv);
   vec4 hs = texture(uHeight, uv);
 
-  float tooth = groundTooth(c, uGround, uGroundDensity, uPxPerUnit);
+  float tooth = texture(uGroundTex, uv).r;
   vec3 ground = uGroundColor * mix(0.9, 1.04, tooth);
   ground *= 1.0 + (vnoise(c * 3.0) - 0.5) * 0.05;                       // uneven priming
   vec3 col = paint.rgb + ground * (1.0 - clamp(paint.a, 0.0, 1.0));
@@ -149,9 +163,8 @@ void main() {
   // ---- relief lighting ---------------------------------------------------------------------------
   vec2 e = uTexel * 1.25;
   vec2 ex = vec2(e.x, 0.0), ey = vec2(0.0, e.y);
-  vec2 cx = vec2(e.x * uAspect, 0.0), cy = vec2(0.0, e.y);
-  float hl = surfaceH(uv - ex, c - cx, paint.a), hr = surfaceH(uv + ex, c + cx, paint.a);
-  float hd = surfaceH(uv - ey, c - cy, paint.a), hu = surfaceH(uv + ey, c + cy, paint.a);
+  float hl = surfaceH(uv - ex, paint.a), hr = surfaceH(uv + ex, paint.a);
+  float hd = surfaceH(uv - ey, paint.a), hu = surfaceH(uv + ey, paint.a);
   vec3 n = normalize(vec3((hl - hr) * uRelief, (hd - hu) * uRelief, 1.0));
 
   // living shimmer — light dances on the wet surface like on water
@@ -178,7 +191,7 @@ void main() {
   vec3 lit = col * (uAmbient + (1.0 - uAmbient) * shade) * ao * uLightColor + spec * uLightColor;
 
   // glowing accents (the sun, sparkles) — feeds the bloom
-  lit += paint.rgb * hs.b * uAccentGlow * 1.5;
+  lit += paint.rgb * paint.rgb * hs.b * uAccentGlow * 0.9;
 
   // ---- grade -------------------------------------------------------------------------------------
   float luma = dot(lit, vec3(0.2126, 0.7152, 0.0722));

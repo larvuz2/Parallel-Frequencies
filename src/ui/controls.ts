@@ -137,15 +137,19 @@ export function dropdown(options: SelectOption[], value: string, onSelect: (v: s
     }
     document.body.append(menu);
     const r = btn.getBoundingClientRect();
-    const mh = Math.min(420, window.innerHeight - 24);
-    menu.style.maxHeight = `${mh}px`;
-    menu.style.width = `${Math.max(r.width, 220)}px`;
-    let left = r.right - Math.max(r.width, 220);
-    left = Math.max(8, left);
-    menu.style.left = `${left}px`;
-    const below = window.innerHeight - r.bottom - 8;
-    if (below >= Math.min(mh, menu.scrollHeight) || below > 260) menu.style.top = `${r.bottom + 4}px`;
-    else menu.style.bottom = `${window.innerHeight - r.top + 4}px`;
+    const width = Math.min(window.innerWidth - 16, Math.max(r.width, opts.compact ? 200 : 290));
+    menu.style.width = `${width}px`;
+    menu.style.left = `${Math.max(8, r.right - width)}px`;
+    const below = window.innerHeight - r.bottom - 12;
+    const above = r.top - 12;
+    const need = Math.min(420, menu.scrollHeight);
+    if (below >= need || below >= above) {
+      menu.style.top = `${r.bottom + 4}px`;
+      menu.style.maxHeight = `${Math.min(420, below)}px`;
+    } else {
+      menu.style.bottom = `${window.innerHeight - r.top + 4}px`;
+      menu.style.maxHeight = `${Math.min(420, above)}px`;
+    }
     btn.classList.add('open');
     openDropdown = close;
     menu.querySelector('.active')?.scrollIntoView({ block: 'nearest' });

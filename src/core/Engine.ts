@@ -161,8 +161,10 @@ export class Engine {
     }
 
     for (const p of this.pointers) {
-      p.vx *= Math.exp(-dt * 10);
-      p.vy *= Math.exp(-dt * 10);
+      p.vx = p.ax / dt;
+      p.vy = p.ay / dt;
+      p.ax = 0;
+      p.ay = 0;
     }
 
     if (this.movement) {
@@ -235,30 +237,24 @@ export class Engine {
       let p = this.pointers.find((q) => q.id === e.pointerId);
       if (!p) {
         const uv = toUv(e);
-        p = { id: e.pointerId, x: uv.x, y: uv.y, vx: 0, vy: 0, down: false, active: true };
+        p = { id: e.pointerId, x: uv.x, y: uv.y, vx: 0, vy: 0, ax: 0, ay: 0, down: false, active: true };
         this.pointers.push(p);
       }
       return p;
     };
-    let last = performance.now();
     el.addEventListener('pointerdown', (e) => {
       const p = get(e);
       const uv = toUv(e);
-      p.x = uv.x; p.y = uv.y; p.vx = 0; p.vy = 0;
+      p.x = uv.x; p.y = uv.y; p.ax = 0; p.ay = 0;
       p.down = true;
       p.active = true;
       el.setPointerCapture(e.pointerId);
     });
     el.addEventListener('pointermove', (e) => {
       const p = get(e);
-      const now = performance.now();
-      const dt = Math.max(1, now - last) / 1000;
-      last = now;
       const uv = toUv(e);
-      const vx = (uv.x - p.x) / dt;
-      const vy = (uv.y - p.y) / dt;
-      p.vx += (vx - p.vx) * 0.5;
-      p.vy += (vy - p.vy) * 0.5;
+      p.ax += uv.x - p.x;
+      p.ay += uv.y - p.y;
       p.x = uv.x;
       p.y = uv.y;
       p.active = true;

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FULLSCREEN_VERT } from '../../shaders/common';
 import { STROKE_FRAG, STROKE_VERT } from './shaders/stroke';
-import { COMPOSITE_FRAG, COPY_FRAG, PROCESS_FRAG } from './shaders/surface';
+import { COMPOSITE_FRAG, COPY_FRAG, GROUND_FRAG, PROCESS_FRAG } from './shaders/surface';
 
 function makeMRT(w: number, h: number) {
   const t = new THREE.WebGLRenderTarget(w, h, {
@@ -36,6 +36,9 @@ export class PaintSurface {
   readonly strokeMat: THREE.RawShaderMaterial;
   readonly compositeMat: THREE.RawShaderMaterial;
   private copyMat: THREE.RawShaderMaterial;
+  private groundMat: THREE.RawShaderMaterial;
+  private ground: THREE.WebGLRenderTarget;
+  private groundKey = '';
   private quad: THREE.Mesh;
   private quadScene = new THREE.Scene();
   private strokeScene = new THREE.Scene();
@@ -79,9 +82,9 @@ export class PaintSurface {
       vertexShader: STROKE_VERT,
       fragmentShader: STROKE_FRAG,
       uniforms: {
-        uPrevPaint: { value: null }, uPrevHeight: { value: null }, uAspect: { value: 1 }, uGround: { value: 0 },
-        uGroundDensity: { value: 260 }, uBristleContrast: { value: 0.7 }, uEdgeRough: { value: 0.5 },
-        uDryBrush: { value: 0.7 }, uBrokenColor: { value: 0.5 }, uHeightCarry: { value: 0.6 }, uPxPerUnit: { value: 1000 },
+        uPrevPaint: { value: null }, uPrevHeight: { value: null }, uGroundTex: { value: null }, uAspect: { value: 1 },
+        uBristleContrast: { value: 0.7 }, uEdgeRough: { value: 0.5 },
+        uDryBrush: { value: 0.7 }, uBrokenColor: { value: 0.5 }, uHeightCarry: { value: 0.6 },
       },
       depthTest: false,
       depthWrite: false,
@@ -102,11 +105,11 @@ export class PaintSurface {
       fragmentShader: COMPOSITE_FRAG,
       uniforms: {
         uPaint: { value: null }, uHeight: { value: null }, uTexel: { value: new THREE.Vector2() }, uAspect: { value: 1 },
-        uTime: { value: 0 }, uGround: { value: 0 }, uGroundDensity: { value: 260 }, uGroundColor: { value: new THREE.Color() },
+        uTime: { value: 0 }, uGroundTex: { value: null }, uGroundColor: { value: new THREE.Color() },
         uGroundRelief: { value: 0.35 }, uLightDir: { value: new THREE.Vector3(0, 0, 1) }, uLightColor: { value: new THREE.Color(1, 1, 1) },
         uRelief: { value: 14 }, uGloss: { value: 40 }, uSheen: { value: 0.3 }, uAmbient: { value: 0.55 }, uShimmer: { value: 0 },
         uAccentGlow: { value: 1 }, uHaze: { value: new THREE.Color() }, uHazeAmt: { value: 0 }, uSaturation: { value: 1 },
-        uContrast: { value: 1 }, uExposure: { value: 1 }, uWarmth: { value: 0 }, uBreath: { value: 0 }, uPxPerUnit: { value: 1000 },
+        uContrast: { value: 1 }, uExposure: { value: 1 }, uWarmth: { value: 0 }, uBreath: { value: 0 },
       },
       depthTest: false,
       depthWrite: false,
@@ -120,6 +123,24 @@ export class PaintSurface {
       depthTest: false,
       depthWrite: false,
     });
+
+    this.groundMat = new THREE.RawShaderMaterial({
+      glslVersion: THREE.GLSL3,
+      vertexShader: FULLSCREEN_VERT,
+      fragmentShader: GROUND_FRAG,
+      uniforms: { uAspect: { value: 1 }, uGround: { value: 0 }, uGroundDensity: { value: 260 }, uPxPerUnit: { value: 1000 } },
+      depthTest: false,
+      depthWrite: false,
+    });
+    this.ground = new THREE.WebGLRenderTarget(w, h, {
+      type: THREE.UnsignedByteType,
+      format: THREE.RedFormat,
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      depthBuffer: false,
+    });
+    this.strokeMat.uniforms.uGroundTex.value = this.ground.texture;
+    this.compositeMat.uniforms.uGroundTex.value = this.ground.texture;
 
     this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.processMat);
     this.quad.frustumCulled = false;
@@ -156,6 +177,20 @@ export class PaintSurface {
     r.setClearColor(prevC, prev);
   }
 
+  /** Re-bake the ground texture if its kind, density or the canvas size changed. */
+  updateGround(kind: number, density: number, aspect: number) {
+    const key = `${kind}|${density.toFixed(1)}|${this.width}x${this.height}|${aspect.toFixed(4)}`;
+    if (key === this.groundKey) return;
+    this.groundKey = key;
+    const u = this.groundMat.uniforms;
+    u.uAspect.value = aspect;
+    u.uGround.value = kind;
+    u.uGroundDensity.value = density;
+    u.uPxPerUnit.value = this.height;
+    this.draw(this.groundMat, this.ground);
+    this.renderer.setRenderTarget(null);
+  }
+
   /** Age the surface (A → B), then swap so A is current. */
   process() {
     const u = this.processMat.uniforms;
@@ -172,7 +207,6 @@ export class PaintSurface {
   strokes(count: number) {
     if (!count) return;
     const u = this.strokeMat.uniforms;
-    u.uPxPerUnit.value = this.height;
     u.uPrevPaint.value = this.b.textures[0];
     u.uPrevHeight.value = this.b.textures[1];
     this.renderer.setRenderTarget(this.a);
@@ -184,7 +218,6 @@ export class PaintSurface {
     u.uPaint.value = this.a.textures[0];
     u.uHeight.value = this.a.textures[1];
     u.uTexel.value.set(1 / this.width, 1 / this.height);
-    u.uPxPerUnit.value = this.height;
     this.draw(this.compositeMat, this.output);
     this.renderer.setRenderTarget(null);
   }
@@ -207,6 +240,8 @@ export class PaintSurface {
     this.copyMat.uniforms.uSrc2.value = this.a.textures[1];
     this.draw(this.copyMat, this.b);
     this.output.setSize(w, h);
+    this.ground.setSize(w, h);
+    this.groundKey = '';
     this.width = w;
     this.height = h;
     this.renderer.setRenderTarget(null);
@@ -216,6 +251,8 @@ export class PaintSurface {
     this.a.dispose();
     this.b.dispose();
     this.output.dispose();
+    this.ground.dispose();
+    this.groundMat.dispose();
     this.processMat.dispose();
     this.strokeMat.dispose();
     this.compositeMat.dispose();

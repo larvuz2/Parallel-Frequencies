@@ -41,6 +41,7 @@ export class ImpressionismWorld implements MovementInstance {
   private pendDry = 0;
   private pendEm = 0;
   private wash = 0;
+  private lastAccent = -1;
 
   private paintingPointers = new Set<number>();
   private lightAz = 135;
@@ -135,9 +136,11 @@ export class ImpressionismWorld implements MovementInstance {
     y = reflectInto(y, margin, 1 - margin);
 
     // ---- which brush ---------------------------------------------------------------------------
-    const accent = e.velocity >= p.num('im.accentThreshold');
+    // one luminous accent per gesture — the sun is a single focal point, not every loud note
+    const accent = e.velocity >= p.num('im.accentThreshold') && this.time - this.lastAccent > 0.35;
+    if (accent) this.lastAccent = this.time;
     let type = brushTypeFor(p.str('im.brush'), pn);
-    if (accent && type === BRUSH_TYPES.wash) type = BRUSH_TYPES.filbert;
+    if (accent) type = type === BRUSH_TYPES.dab ? BRUSH_TYPES.dab : BRUSH_TYPES.round;
 
     // ---- direction -----------------------------------------------------------------------------
     const horizon = p.num('im.horizon');
@@ -329,8 +332,9 @@ export class ImpressionismWorld implements MovementInstance {
     const wander = p.num('im.wander');
     const margin = p.num('im.margin');
     const wt = time * (0.02 + wander * 0.12);
-    this.fx = A * (0.5 + 0.42 * simplex3(wt, 3.1, 0.5));
-    this.fy = 0.5 + 0.36 * simplex3(7.7, wt * 0.8, 1.5);
+    // offsets make the attention start near the centre of the canvas
+    this.fx = A * (0.5 + 0.42 * (simplex3(wt, 3.1, 0.5) - simplex3(0, 3.1, 0.5)));
+    this.fy = 0.5 + 0.36 * (simplex3(7.7, wt * 0.8, 1.5) - simplex3(7.7, 0, 1.5));
     this.fx = clamp(this.fx, margin + 0.05, A - margin - 0.05);
     this.scoreX += dt * (A / 90);
     if (this.scoreX > A - margin) this.scoreX = margin + 0.02;
@@ -410,8 +414,7 @@ export class ImpressionismWorld implements MovementInstance {
     const su = this.surface.strokeMat.uniforms;
     const groundKind = GROUND_KIND[p.str('im.ground')] ?? 0;
     su.uAspect.value = A;
-    su.uGround.value = groundKind;
-    su.uGroundDensity.value = p.num('im.groundDensity');
+    this.surface.updateGround(groundKind, p.num('im.groundDensity'), A);
     su.uBristleContrast.value = p.num('im.bristleContrast');
     su.uEdgeRough.value = p.num('im.edgeRough');
     su.uDryBrush.value = p.num('im.dryBrush');
@@ -442,8 +445,6 @@ export class ImpressionismWorld implements MovementInstance {
     const cu = this.surface.compositeMat.uniforms;
     cu.uAspect.value = A;
     cu.uTime.value = time;
-    cu.uGround.value = groundKind;
-    cu.uGroundDensity.value = p.num('im.groundDensity');
     (cu.uGroundColor.value as THREE.Color).setRGB(...hexToRgb(groundById(p.str('im.groundTone')).color));
     cu.uGroundRelief.value = p.num('im.groundRelief');
     (cu.uLightDir.value as THREE.Vector3).set(Math.cos(elr) * Math.cos(azr), Math.cos(elr) * Math.sin(azr), Math.sin(elr));

@@ -24,6 +24,8 @@ export class AudioFilePlayer implements Transport {
   private fluxHist: number[] = [];
   private active = new Map<number, { level: number; born: number }>();
   private lastOnset = 0;
+  /** running peak loudness — normalises velocities across differently mastered recordings */
+  private peak = 0.05;
   private url: string;
   private _profile: number[] | null = null;
   private source: MediaElementAudioSourceNode;
@@ -105,6 +107,7 @@ export class AudioFilePlayer implements Transport {
     for (let i = 0; i < this.time.length; i++) rms += this.time[i] * this.time[i];
     rms = Math.sqrt(rms / this.time.length);
     const loud = Math.min(1, rms * 5);
+    this.peak = Math.max(loud, this.peak * 0.9993, 0.02);
     let num = 0, den = 0, flux = 0;
     const lo = Math.floor(40 / binHz), hi = Math.min(this.spec.length - 1, Math.floor(5000 / binHz));
     for (let i = lo; i < hi; i++) {
@@ -139,7 +142,8 @@ export class AudioFilePlayer implements Transport {
     if (!onset) return;
     this.lastOnset = now;
     const peaks = this.findPeaks(binHz);
-    const strength = Math.min(1, 0.25 + loud * 1.4 + (flux - mean) / (sd * 8 + 1e-6) * 0.1);
+    const rel = Math.pow(Math.min(1, loud / this.peak), 0.8);
+    const strength = Math.min(1, 0.22 + 0.7 * rel + Math.min(0.08, ((flux - mean) / (sd * 8 + 1e-6)) * 0.05));
     for (const pk of peaks) {
       if (this.active.has(pk.note)) {
         this.bus.noteOff({ note: pk.note, channel: 0, source: 'audio' });

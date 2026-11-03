@@ -80,10 +80,11 @@ float paperTooth(vec2 c, float density) {
 }
 
 float gessoTooth(vec2 c, float density) {
-  // smooth panel with long, soft brush marks of the gesso application
-  vec2 q = vec2(c.x * 0.6 + snoise(c * 1.5) * 0.08, c.y * density * 0.18);
-  float streak = vnoise(vec2(q.x * 1.5, q.y * 6.0)) * 0.6 + vnoise(vec2(q.x * 0.4, q.y * 22.0)) * 0.4;
-  return clamp(0.35 + (streak - 0.5) * 0.7 + (vnoise(c * density * 2.0) - 0.5) * 0.15, 0.0, 1.0);
+  // smooth panel; long, soft brush marks left by the gesso application
+  vec2 q = vec2(c.x * 1.1 + snoise(c * 0.7) * 0.35, c.y * density * 0.045 + snoise(c * 1.3) * 0.6);
+  float streak = vnoise(vec2(q.x * 0.7, q.y)) * 0.6 + vnoise(vec2(q.x * 0.25, q.y * 2.7)) * 0.4;
+  float fine = vnoise(c * density * 1.4);
+  return clamp(0.5 + (streak - 0.5) * 0.4 + (fine - 0.5) * 0.12, 0.0, 1.0);
 }
 
 // pxPerUnit: screen pixels per canvas unit — used to fade detail that would alias into moiré
@@ -99,7 +100,7 @@ float groundTooth(vec2 c, int kind, float density, float pxPerUnit) {
   float pxPerThread = pxPerUnit / max(eff, 1.0);
   float aa = smoothstep(1.8, 4.0, pxPerThread);
   float t = groundToothRaw(c, kind, density);
-  float soft = 0.5 + (vnoise(c * pxPerUnit * 0.35) - 0.5) * 0.25;
+  float soft = 0.5 + (vnoise(c * pxPerUnit * 0.12) - 0.5) * 0.14;
   return mix(soft, t, kind == 3 || kind == 4 ? 1.0 : aa);
 }
 `;
