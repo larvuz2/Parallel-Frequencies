@@ -7,6 +7,7 @@ export const VEIN_PALETTES: VeinPalette[] = [
   { id: 'glacier', label: 'Glacier — cyan and ice', a: '#3fb8ff', b: '#5fe2e4', c: '#e2f6ff' },
   { id: 'orchid', label: 'Orchid — pink and violet', a: '#ff5fa8', b: '#b39bff', c: '#7a6aff' },
   { id: 'bio', label: 'Bioluminescent', a: '#39ffb0', b: '#5fe2e4', c: '#c8ff6a' },
+  { id: 'nocturne', label: 'Nocturne — amber and blue', a: '#ff9a3c', b: '#7aa0ff', c: '#cfe0ff' },
   { id: 'mono', label: 'Silver', a: '#d8dce4', b: '#ffffff', c: '#aab4c8' },
 ];
 

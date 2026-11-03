@@ -61,7 +61,8 @@ void main() {
     vec3 pn = texelFetch(uPrevNrm, ivec2(c.x - 1, c.y), 0).xyz;
     if (dot(prev.xyz, prev.xyz) > 1e-4 && dot(pn, pn) > 0.5) {
       vec3 q0 = prev.xyz;
-      vec3 rad = normalize(q0 / uStretch);
+      vec3 q0u = q0 - bendOff(q0.x);
+      vec3 rad = normalize(q0u / uStretch);
       // the comb: a long-range sweep that slowly turns in space
       vec3 sw = normalize(vec3(0.35, 1.0, 0.2) + vec3(snoise3(q0 * 0.4), snoise3(q0 * 0.4 + 4.0) * 0.5, snoise3(q0 * 0.4 + 9.0)) * uSweep);
       vec3 t = sw - pn * dot(sw, pn);
@@ -79,7 +80,7 @@ void main() {
         oNrm = vec4(pn, 1.0);
         return;
       }
-      d = normalize((q0 + t * uStep) / uStretch);
+      d = normalize((q0u + t * uStep) / uStretch);
     }
   }
   float h;
@@ -90,9 +91,13 @@ void main() {
   float ha, hb;
   vec3 pa = surfP(normalize(d + t1 * 0.006), ha);
   vec3 pb = surfP(normalize(d + t2 * 0.006), hb);
+  float cr = crestOf(p);
+  p += bendOff(p.x);
+  pa += bendOff(pa.x);
+  pb += bendOff(pb.x);
   vec3 n = normalize(cross(pa - p, pb - p));
   if (dot(n, d) < 0.0) n = -n;
-  oPos = vec4(p, crestOf(p));
+  oPos = vec4(p, cr);
   oNrm = vec4(n, h / max(uAmp, 0.01));
 }
 `;
@@ -110,6 +115,7 @@ uniform float uGrowth;
 uniform float uLayer;
 uniform float uMaxSeg;
 uniform float uSmokeWidth;
+uniform float uCells;
 in float aIdx;
 out float vV;
 out float vU;
@@ -145,6 +151,12 @@ void main() {
   #else
   if (wisp && k >= 3) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
   #endif
+  // where the skin turns into glowing membranes, the strands open up to reveal them
+  if (uCells > 0.0) {
+    vec3 Pc = texelFetch(tPos, ivec2(col * ${K} + ${K >> 1}, row), 0).xyz;
+    vec3 Pcu = Pc;
+    if (snoise3(Pcu * 0.7 + 5.3) > 0.42 + 0.3 * (1.0 - uCells)) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+  }
   if (edge <= 0.0 || u > reach || dot(Nn.xyz, Nn.xyz) < 0.5 || dot(T, T) < 1e-10 || length(T) > uMaxSeg) {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     return;
@@ -210,6 +222,9 @@ uniform float uVeinHi;
 uniform float uPulse;
 uniform float uToneVar;
 uniform float uSmokeBright;
+uniform float uPatch;
+uniform float uPatchScale;
+uniform float uPatchCover;
 uniform vec3 uVeinA;
 uniform vec3 uVeinB;
 uniform vec3 uVeinC;
@@ -256,6 +271,11 @@ void main() {
   float crest = smoothstep(uVeinLo, uVeinHi, vCrest);
   float pulse = 1.0 - uPulse * 0.5 + uPulse * 0.5 * sin(vU * 3.0 - uTime * 0.6 + vSeed * 0.013);
   vec3 emis = vein * crest * uCrestGlow * (isVein * 2.4 + 0.03) * pulse;
+  if (uPatch > 0.0) {
+    float patchM = smoothstep(uPatchCover, uPatchCover + 0.35, snoise3(vP * uPatchScale + 3.1));
+    float speck = step(hh(vec2(vSeed * 0.71, 3.7)), 0.45) * (0.4 + 0.6 * hh(vec2(vSeed * 0.29, 8.8)));
+    emis += uVeinA * patchM * speck * uPatch * 1.6;
+  }
   for (int i = 0; i < ${MAX_SOURCES}; i++) {
     if (i >= uNumSrc) break;
     vec3 dd = vP - uSrcPos[i].xyz;
@@ -300,7 +320,7 @@ export class Strands {
       fragmentShader: TRACE_FRAG,
       uniforms: {
         uPrevPos: { value: null }, uPrevNrm: { value: null }, uStep: { value: 0.045 }, uContour: { value: 0.6 }, uSweep: { value: 0.9 }, uWispShare: { value: 0.1 }, uWispLift: { value: 1 }, uWispTurb: { value: 1 }, uWispLen: { value: 2.5 },
-        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 },
+        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 }, uBend: { value: 0 }, uBendFreq: { value: 1 },
         uStretch: { value: new THREE.Vector3(1.2, 1, 1) },
       },
       depthTest: false,
@@ -319,7 +339,7 @@ export class Strands {
         uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uWispShare: { value: 0.1 }, uWispAlpha: { value: 0.3 },
         uTint: { value: new THREE.Color(1, 1, 1) }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
         uSmokeCol: { value: new THREE.Color(0.2, 0.21, 0.23) }, uSmokeTint: { value: 0.5 }, uWarmShare: { value: 0.15 }, uFrontFade: { value: 0.85 },
-        uVeinLo: { value: 0.86 }, uVeinHi: { value: 0.98 }, uPulse: { value: 0.4 }, uToneVar: { value: 0.4 }, uSmokeBright: { value: 1 }, uSmokeWidth: { value: 1 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
+        uVeinLo: { value: 0.86 }, uVeinHi: { value: 0.98 }, uPulse: { value: 0.4 }, uToneVar: { value: 0.4 }, uSmokeBright: { value: 1 }, uSmokeWidth: { value: 1 }, uCells: { value: 0 }, uPatch: { value: 0 }, uPatchScale: { value: 1.2 }, uPatchCover: { value: 0.2 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
         uGloss: { value: 40 }, uSheen: { value: 0.4 }, uRim: { value: 0.6 }, uCrestGlow: { value: 1 }, uVeinShare: { value: 0.12 }, uTime: { value: 0 },
         uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
         uNumSrc: { value: 0 }, uSrcPos: { value: [] }, uSrcForce: { value: [] }, uSrcCol: { value: [] },

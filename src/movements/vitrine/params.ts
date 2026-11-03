@@ -146,6 +146,9 @@ const NEW_PARAMS: ParamDef[] = [
   { key: 'vt.offsetY', label: 'Vertical position', group: 'shape', type: 'range', min: -1, max: 1, step: 0.01, default: 0, format: x2 },
   { key: 'vt.spin', label: 'Rotation', group: 'shape', type: 'range', min: -0.4, max: 0.4, step: 0.005, default: 0, format: (v) => `${v.toFixed(3)} rad/s`, hint: 'Slowly turns the whole mass.' },
 
+  { key: 'vt.bend', label: 'Snake / twist', group: 'shape', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0, format: x2, hint: 'Bends the mass into a twisting, snaking body along its length.' },
+  { key: 'vt.bendFreq', label: 'Twist frequency', group: 'shape', type: 'range', min: 0.2, max: 3, step: 0.01, default: 1, format: x2 },
+
   /* strands */
   { key: 'vt.matterColor', label: 'Matter colour', group: 'strands', type: 'color', default: '#ffffff', hint: 'Tints the strands and body. White keeps the neutral grey.' },
   { key: 'vt.toneVar', label: 'Tone variation', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0.4, format: pct, hint: 'How much individual strands differ in brightness.' },
@@ -164,6 +167,15 @@ const NEW_PARAMS: ParamDef[] = [
   { key: 'vt.veinC', label: 'Vein colour — high', group: 'veins', type: 'color', default: '#5fe2e4' },
   { key: 'vt.veinThreshold', label: 'Vein threshold', group: 'veins', type: 'range', min: 0.5, max: 0.98, step: 0.005, default: 0.86, format: x3, hint: 'Lower: veins spread further from the fold crests.' },
   { key: 'vt.pulse', label: 'Vein pulse', group: 'veins', type: 'range', min: 0, max: 1, step: 0.01, default: 0.4, format: pct, hint: 'Light slowly travelling along the glowing strands.' },
+
+  { key: 'vt.patch', label: 'Ember patches', group: 'veins', type: 'range', min: 0, max: 3, step: 0.01, default: 0, format: x2, hint: 'Speckles of warm light (low vein colour) scattered over areas of the skin.' },
+  { key: 'vt.patchScale', label: 'Patch size', group: 'veins', type: 'range', min: 0.2, max: 4, step: 0.01, default: 1.2, format: x2, hint: 'Small values: a few large patches.' },
+  { key: 'vt.patchCover', label: 'Patch coverage', group: 'veins', type: 'range', min: -0.6, max: 0.8, step: 0.01, default: 0.2, format: x2, hint: 'Lower: patches cover more of the skin.' },
+  { key: 'vt.cells', label: 'Glowing membranes', group: 'veins', type: 'range', min: 0, max: 2, step: 0.01, default: 0, format: x2, hint: 'In some regions the skin opens into translucent cells glowing with the high vein colour.' },
+  { key: 'vt.cellScale', label: 'Cell size', group: 'veins', type: 'range', min: 1, max: 20, step: 0.1, default: 6, format: (v) => v.toFixed(1), hint: 'Higher: smaller, denser cells.' },
+  { key: 'vt.webs', label: 'Web threads', group: 'smoke', type: 'range', min: 0, max: 600, step: 1, default: 0, hint: 'Fine silk threads spun across the matter.' },
+  { key: 'vt.webOpacity', label: 'Thread brightness', group: 'smoke', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.35, format: x2 },
+  { key: 'vt.webColor', label: 'Thread colour', group: 'smoke', type: 'color', default: '#c0d0ff' },
 
   /* lighting */
   { key: 'vt.keyColor', label: 'Key light colour', group: 'lighting', type: 'color', default: '#ffffff' },
@@ -227,10 +239,10 @@ const GROUP_OF: Record<string, string> = {
 /** Order inside each section: listed keys first (in this order), then the rest. */
 const ORDER = [
   'vt.camera', 'vt.zoom', 'vt.camHeight', 'vt.fov', 'vt.camSpeed', 'vt.sway',
-  'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.folds', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
+  'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.bend', 'vt.bendFreq', 'vt.folds', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
   'vt.strands', 'vt.matterColor', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
-  'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade',
-  'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',
+  'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade', 'vt.webs', 'vt.webOpacity', 'vt.webColor',
+  'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.patch', 'vt.patchScale', 'vt.patchCover', 'vt.cells', 'vt.cellScale', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',
   'vt.key', 'vt.keyColor', 'vt.keyAz', 'vt.keyEl', 'vt.ambient', 'vt.rim', 'vt.rimColor', 'vt.sheen', 'vt.gloss',
   'vt.frame', 'vt.woodTexture', 'vt.woodRelief', 'vt.wood', 'vt.woodTint', 'vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.woodRough', 'vt.woodCoat', 'vt.grain', 'vt.woodLight',
   'vt.bgColor', 'vt.floor', 'vt.floorColor', 'vt.floorRough', 'vt.fogNear', 'vt.fogFar', 'vt.spot', 'vt.spotColor', 'vt.spotAngle', 'vt.env',

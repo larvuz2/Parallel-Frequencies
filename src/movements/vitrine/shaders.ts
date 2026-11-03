@@ -76,6 +76,13 @@ uniform float uEvolve;
 uniform vec3 uStretch;
 uniform float uLobe;
 uniform float uLobeScale;
+uniform float uBend;
+uniform float uBendFreq;
+
+/** sideways displacement that bends the mass into a twisting, snaking body (depends on x only) */
+vec3 bendOff(float x) {
+  return vec3(0.0, sin(x * uBendFreq + uTime * uEvolve * 3.0) * uBend, cos(x * uBendFreq * 0.8 + 1.7 + uTime * uEvolve * 2.0) * uBend * 0.8);
+}
 
 float crestOf(vec3 p) {
   vec3 q = p * uFreq + vec3(0.0, uTime * uEvolve, uTime * uEvolve * 0.6);
@@ -98,6 +105,7 @@ float disp(vec3 p) {
   return (r1 * r1 - 0.45 + r2) * uAmp + lobe * uLobe;
 }
 float field(vec3 p) {
+  p -= bendOff(p.x);
   vec3 s = p / uStretch;
   return length(s) - uR - disp(p);
 }
@@ -113,7 +121,7 @@ void main() {
   float f = field(p);
   vec3 n = vec3(field(p + vec3(e, 0.0, 0.0)) - f, field(p + vec3(0.0, e, 0.0)) - f, field(p + vec3(0.0, 0.0, e)) - f);
   n = normalize(n + 1e-6);
-  gl_FragColor = vec4(n, crestOf(p));
+  gl_FragColor = vec4(n, crestOf(p - bendOff(p.x)));
 }
 `;
 
@@ -173,7 +181,8 @@ void main() {
     if (hh(uv * 19.7 + 2.0) < uScatter) {
       float z = r.x * 2.0, ang = r.y * 6.2831853 + 3.14159;
       float sxy = sqrt(max(1.0 - z * z, 0.0));
-      gl_FragColor = vec4(vec3(sxy * cos(ang), z, sxy * sin(ang)) * uStretch * (uR + 0.3), 1.0);
+      vec3 bp = vec3(sxy * cos(ang), z, sxy * sin(ang)) * uStretch * (uR + 0.3);
+      gl_FragColor = vec4(bp + bendOff(bp.x), 1.0);
     } else {
       gl_FragColor = vec4(uBirth + r * uBirthSpread, 1.0);
     }

@@ -4,6 +4,7 @@ import { neoplasticism } from './neoplasticism';
 import { baroque } from './baroque';
 import { symbolism } from './symbolism';
 import { vitrine } from './vitrine';
+import { cuadro } from './cuadro';
 
 const soon = (id: string, title: string, pairing: string, musical: string, description: string): MovementDefinition => ({
   id, title, pairing, musical, description, available: false,
@@ -35,6 +36,7 @@ export const MOVEMENTS: MovementDefinition[] = [
   soon('conceptual', 'Conceptual Art', 'Kosuth × Cage', 'Indeterminacy', 'Rule-based systems, generative typography.'),
   soon('postmodernism', 'Postmodernism', 'Cindy Sherman × John Zorn', 'Postmodern', 'Layered compositing, sampling, recursive feedback.'),
   vitrine,
+  cuadro,
   soon('generative', 'Generative Art', 'Casey Reas × Brian Eno', 'Algorithmic music', 'Reaction-diffusion, flow fields, compute particles.'),
 ];
 

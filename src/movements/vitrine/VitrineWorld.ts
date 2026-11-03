@@ -10,6 +10,7 @@ import { VITRINE_CAMERA } from './params';
 import { veinPalette, WOODS } from './palettes';
 import { createMatter } from './matter';
 import { Strands } from './strands';
+import { Webs } from './webs';
 import { FIBRE_FRAG, FIBRE_VERT, GLOW_SHADER, MAX_SOURCES, NORMAL_SHADER, POSITION_SHADER, VELOCITY_SHADER } from './shaders';
 
 
@@ -49,6 +50,7 @@ export class VitrineWorld implements MovementInstance {
   private frame = new THREE.Group();
   private matter = createMatter();
   private strands: Strands;
+  private webs = new Webs();
   private woodMat: THREE.MeshPhysicalMaterial;
   private floor: THREE.Mesh;
   private key = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -91,10 +93,17 @@ export class VitrineWorld implements MovementInstance {
     const t = e.target as HTMLElement | null;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     const i = parseInt(e.key, 10);
-    if (i >= 1 && i <= VITRINE_CAMERA.length) this.ctx.params.set('vt.camera', VITRINE_CAMERA[i - 1].value);
+    if (i >= 1 && i <= VITRINE_CAMERA.length) this.ctx.params.set(this.k('camera'), VITRINE_CAMERA[i - 1].value);
   };
 
-  constructor(private ctx: EngineContext) {
+  /** parameter namespace: the Vitrine uses 'vt.', other modes reuse this world with their own */
+  private pfx = 'vt.';
+  k(name: string) {
+    return this.pfx + name;
+  }
+
+  constructor(private ctx: EngineContext, opts: { prefix?: string } = {}) {
+    this.pfx = opts.prefix ?? 'vt.';
     const r = ctx.renderer;
     const s = r.getDrawingBufferSize(new THREE.Vector2());
     this.width = s.x;
@@ -127,19 +136,19 @@ export class VitrineWorld implements MovementInstance {
     mu.uSrcPos.value = this.srcPos;
     mu.uSrcForce.value = this.srcForce;
     mu.uSrcCol.value = this.srcCol;
-    this.strands = new Strands(r, parseInt(ctx.params.str('vt.strands'), 10) || 16384);
+    this.strands = new Strands(r, parseInt(ctx.params.str(this.k('strands')), 10) || 16384);
     const su = this.strands.material.uniforms;
     su.uSrcPos.value = this.srcPos;
     su.uSrcForce.value = this.srcForce;
     su.uSrcCol.value = this.srcCol;
-    this.mass.add(this.strands.mesh, this.strands.wispMesh);
+    this.mass.add(this.strands.mesh, this.strands.wispMesh, this.webs.mesh);
     // choosing a vein palette fills in the three vein colour pickers
     this.unsub = ctx.params.onChange((k, v) => {
-      if (k !== 'vt.palette') return;
+      if (k !== this.k('palette')) return;
       const pl = veinPalette(v as string);
-      ctx.params.set('vt.veinA', pl.a);
-      ctx.params.set('vt.veinB', pl.b);
-      ctx.params.set('vt.veinC', pl.c);
+      ctx.params.set(this.k('veinA'), pl.a);
+      ctx.params.set(this.k('veinB'), pl.b);
+      ctx.params.set(this.k('veinC'), pl.c);
     });
 
     // ---- fibres & dots
@@ -169,8 +178,8 @@ export class VitrineWorld implements MovementInstance {
       ...blend,
     });
 
-    this.buildSimulation(parseInt(ctx.params.str('vt.count'), 10) || 512);
-    this.spawned = ctx.params.num('vt.startFill');
+    this.buildSimulation(parseInt(ctx.params.str(this.k('count')), 10) || 512);
+    this.spawned = ctx.params.num(this.k('startFill'));
 
     r.domElement.addEventListener('wheel', this.onWheel, { passive: false });
     window.addEventListener('keydown', this.onKey);
@@ -296,7 +305,7 @@ export class VitrineWorld implements MovementInstance {
     this.gpu.setVariableDependencies(this.nrmVar, [this.posVar]);
     this.gpu.setVariableDependencies(this.glowVar, [this.posVar, this.glowVar]);
     const field = () => ({
-      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 },
+      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 }, uBend: { value: 0 }, uBendFreq: { value: 1 },
       uStretch: { value: new THREE.Vector3(1.25, 1, 1) },
     });
     Object.assign(this.nrmVar.material.uniforms, field());
@@ -348,7 +357,7 @@ export class VitrineWorld implements MovementInstance {
     const p = this.ctx.params;
     const lat = (pitchNorm(note) * 2 - 1) * 1.15;                         // low notes low, high notes high
     const lon = (((((note % 12) * 7) % 12) / 11) * 2 - 1) * 1.6;           // circle of fifths, around the front
-    const R = p.num('vt.radius') * 1.05;
+    const R = p.num(this.k('radius')) * 1.05;
     return new THREE.Vector3(Math.sin(lon) * Math.cos(lat) * R * 1.25, Math.sin(lat) * R, Math.cos(lon) * Math.cos(lat) * R);
   }
 
@@ -360,17 +369,17 @@ export class VitrineWorld implements MovementInstance {
     this.phraseNotes++;
     const pos = this.surfacePoint(e.note);
     const t = pitchNorm(e.note);
-    const color = new THREE.Color(p.str(t < 0.42 ? 'vt.veinA' : t < 0.66 ? 'vt.veinB' : 'vt.veinC'));
+    const color = new THREE.Color(p.str(t < 0.42 ? this.k('veinA') : t < 0.66 ? this.k('veinB') : this.k('veinC')));
     this.sources.push({
       pos, color,
-      burst: p.num('vt.swell') * modScale(m, 'swell', 0) * (0.3 + e.velocity),
+      burst: p.num(this.k('swell')) * modScale(m, 'swell', 0) * (0.3 + e.velocity),
       held: true, age: 0, released: -1, key: e.note * 64 + (e.channel & 63), note: e.note,
-      radius: p.num('vt.glowRadius') * modScale(m, 'glowRadius', 0.2),
+      radius: p.num(this.k('glowRadius')) * modScale(m, 'glowRadius', 0.2),
     });
     if (this.sources.length > MAX_SOURCES * 3) this.sources.splice(0, this.sources.length - MAX_SOURCES * 3);
     // accumulation: every note releases more matter from where it lands
-    if (p.bool('vt.accumulate')) {
-      this.spawned = Math.min(1, this.spawned + p.num('vt.perNote') * modScale(m, 'growth', 0) * (0.3 + e.velocity));
+    if (p.bool(this.k('accumulate'))) {
+      this.spawned = Math.min(1, this.spawned + p.num(this.k('perNote')) * modScale(m, 'growth', 0) * (0.3 + e.velocity));
       this.birth.copy(pos).multiplyScalar(1.35);
     }
     this.focus.copy(pos);
@@ -400,21 +409,21 @@ export class VitrineWorld implements MovementInstance {
     const sig = this.ctx.signals.values;
     this.time = time;
     const g = modSums(p.routes, sig);
-    const count = parseInt(p.str('vt.count'), 10) || 512;
+    const count = parseInt(p.str(this.k('count')), 10) || 512;
     if (count !== this.size) this.buildSimulation(count);
 
     // ---- accumulation
-    if (!p.bool('vt.accumulate')) this.spawned = 1;
+    if (!p.bool(this.k('accumulate'))) this.spawned = 1;
     else {
-      this.spawned = Math.min(1, this.spawned + p.num('vt.idleGrowth') * dt);
+      this.spawned = Math.min(1, this.spawned + p.num(this.k('idleGrowth')) * dt);
       const silent = time - this.lastNote;
-      if (p.bool('vt.dissolve') && silent > p.num('vt.silentAfter')) {
-        this.spawned = Math.max(p.num('vt.startFill'), this.spawned - p.num('vt.dissolveRate') * dt);
+      if (p.bool(this.k('dissolve')) && silent > p.num(this.k('silentAfter'))) {
+        this.spawned = Math.max(p.num(this.k('startFill')), this.spawned - p.num(this.k('dissolveRate')) * dt);
       }
     }
 
     // ---- sources
-    const decay = p.num('vt.glowDecay');
+    const decay = p.num(this.k('glowDecay'));
     this.sources = this.sources.filter((s) => s.released < decay * 3);
     for (const s of this.sources) {
       s.age += dt;
@@ -424,7 +433,7 @@ export class VitrineWorld implements MovementInstance {
       .map((s) => ({ s, env: s.held ? 1 : Math.exp(-s.released / Math.max(0.05, decay)) }))
       .sort((a, b) => b.env - a.env)
       .slice(0, MAX_SOURCES);
-    const glowAmt = p.num('vt.noteGlow') * modScale(g, 'glow', 0);
+    const glowAmt = p.num(this.k('noteGlow')) * modScale(g, 'glow', 0);
     live.forEach(({ s, env }, i) => {
       this.srcPos[i].set(s.pos.x, s.pos.y, s.pos.z, 0);
       this.srcForce[i].set(s.burst * Math.exp(-s.age * 1.5) * 0.6 + (s.held ? s.burst * 0.25 : 0), 0, s.radius, 0);
@@ -433,37 +442,39 @@ export class VitrineWorld implements MovementInstance {
 
     // ---- simulate
     const sdt = Math.min(dt, 1 / 30);
-    const evolve = p.num('vt.evolve') * modScale(g, 'evolve', 0);
+    const evolve = p.num(this.k('evolve')) * modScale(g, 'evolve', 0);
     this.velVar.material.uniforms.uTime.value = time;
     for (const v of [this.posVar, this.nrmVar]) {
       const u = v.material.uniforms;
       u.uTime.value = time;
       // the whole mass breathes and expands a little with the music
-      u.uR.value = p.num('vt.radius') * (1 + p.num('vt.breathe') * (0.07 * sig.loudness + 0.012 * Math.sin(time * 0.35)));
-      u.uLobe.value = p.num('vt.lobes');
-      u.uAmp.value = p.num('vt.folds') * modScale(g, 'folds', 0.1);
-      u.uFreq.value = p.num('vt.foldScale');
-      u.uWarp.value = p.num('vt.warp');
+      u.uR.value = p.num(this.k('radius')) * (1 + p.num(this.k('breathe')) * (0.07 * sig.loudness + 0.012 * Math.sin(time * 0.35)));
+      u.uLobe.value = p.num(this.k('lobes'));
+      u.uAmp.value = p.num(this.k('folds')) * modScale(g, 'folds', 0.1);
+      u.uFreq.value = p.num(this.k('foldScale'));
+      u.uWarp.value = p.num(this.k('warp'));
       u.uEvolve.value = evolve;
-      u.uStretch.value.set(p.num('vt.width'), p.num('vt.height'), p.num('vt.depth'));
-      u.uLobeScale.value = p.num('vt.lobeScale');
+      u.uStretch.value.set(p.num(this.k('width')), p.num(this.k('height')), p.num(this.k('depth')));
+      u.uLobeScale.value = p.num(this.k('lobeScale'));
+      u.uBend.value = p.num(this.k('bend'));
+      u.uBendFreq.value = p.num(this.k('bendFreq'));
     }
     const vu = this.velVar.material.uniforms;
     vu.uDt.value = sdt;
-    vu.uFlow.value = p.num('vt.flow') * modScale(g, 'flow', 0);
-    vu.uFlowScale.value = p.num('vt.flowScale');
-    vu.uDamping.value = p.num('vt.damping');
-    vu.uWisps.value = clamp(p.num('vt.wisps') * modScale(g, 'wisps', 0), 0, 0.45);
+    vu.uFlow.value = p.num(this.k('flow')) * modScale(g, 'flow', 0);
+    vu.uFlowScale.value = p.num(this.k('flowScale'));
+    vu.uDamping.value = p.num(this.k('damping'));
+    vu.uWisps.value = clamp(p.num(this.k('wisps')) * modScale(g, 'wisps', 0), 0, 0.45);
     vu.uNumSrc.value = live.length;
     const pu = this.posVar.material.uniforms;
     pu.uDt.value = sdt;
-    pu.uStick.value = p.num('vt.stick');
-    pu.uThick.value = p.num('vt.thickness');
+    pu.uStick.value = p.num(this.k('stick'));
+    pu.uThick.value = p.num(this.k('thickness'));
     pu.uWisps.value = vu.uWisps.value;
-    pu.uWispReach.value = p.num('vt.wispReach');
+    pu.uWispReach.value = p.num(this.k('wispReach'));
     pu.uSpawned.value = this.spawned;
     pu.uBirth.value.copy(this.birth);
-    pu.uScatter.value = p.bool('vt.accumulate') ? p.num('vt.scatter') : 1;
+    pu.uScatter.value = p.bool(this.k('accumulate')) ? p.num(this.k('scatter')) : 1;
     const gu = this.glowVar.material.uniforms;
     gu.uDt.value = sdt;
     gu.uDecay.value = decay * (1 + sig.pedal);
@@ -471,54 +482,54 @@ export class VitrineWorld implements MovementInstance {
     this.gpu.compute();
 
     // ---- look
-    const pal = { a: p.str('vt.veinA'), b: p.str('vt.veinB'), c: p.str('vt.veinC') };
+    const pal = { a: p.str(this.k('veinA')), b: p.str(this.k('veinB')), c: p.str(this.k('veinC')) };
     // ---- vitrine & stage
-    const fk = ['vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.grain'].map((k) => p.num(k).toFixed(3)).join('|');
+    const fk = [this.k('frameW'), this.k('frameH'), this.k('frameD'), this.k('beam'), this.k('grain')].map((k) => p.num(k).toFixed(3)).join('|');
     if (fk !== this.frameKey) {
       this.frameKey = fk;
-      this.tileLen = 2.4 / p.num('vt.grain');
-      this.fd = { w: p.num('vt.frameW'), h: p.num('vt.frameH'), d: p.num('vt.frameD'), t: p.num('vt.beam') };
+      this.tileLen = 2.4 / p.num(this.k('grain'));
+      this.fd = { w: p.num(this.k('frameW')), h: p.num(this.k('frameH')), d: p.num(this.k('frameD')), t: p.num(this.k('beam')) };
       this.buildFrame();
       this.floor.position.y = -this.fd.h / 2 - this.fd.t / 2 - 0.001;
     }
-    this.woodMat.color.set(p.str('vt.woodTint'));
-    this.woodMat.roughness = p.num('vt.woodRough');
-    this.woodMat.clearcoat = p.num('vt.woodCoat');
-    this.woodMat.normalScale.setScalar(p.num('vt.woodRelief'));
-    const bg = new THREE.Color(p.str('vt.bgColor'));
+    this.woodMat.color.set(p.str(this.k('woodTint')));
+    this.woodMat.roughness = p.num(this.k('woodRough'));
+    this.woodMat.clearcoat = p.num(this.k('woodCoat'));
+    this.woodMat.normalScale.setScalar(p.num(this.k('woodRelief')));
+    const bg = new THREE.Color(p.str(this.k('bgColor')));
     (this.scene.background as THREE.Color).copy(bg);
     const fog = this.scene.fog as THREE.Fog;
     fog.color.copy(bg);
-    fog.near = p.num('vt.fogNear');
-    fog.far = Math.max(fog.near + 0.5, p.num('vt.fogFar'));
+    fog.near = p.num(this.k('fogNear'));
+    fog.far = Math.max(fog.near + 0.5, p.num(this.k('fogFar')));
     const fm = this.floor.material as THREE.MeshStandardMaterial;
-    fm.color.set(p.str('vt.floorColor'));
-    fm.roughness = p.num('vt.floorRough');
-    this.scene.environmentIntensity = p.num('vt.env');
-    this.top.color.set(p.str('vt.spotColor'));
-    this.top.angle = (p.num('vt.spotAngle') * Math.PI) / 180;
-    this.key.color.set(p.str('vt.keyColor'));
+    fm.color.set(p.str(this.k('floorColor')));
+    fm.roughness = p.num(this.k('floorRough'));
+    this.scene.environmentIntensity = p.num(this.k('env'));
+    this.top.color.set(p.str(this.k('spotColor')));
+    this.top.angle = (p.num(this.k('spotAngle')) * Math.PI) / 180;
+    this.key.color.set(p.str(this.k('keyColor')));
     // ---- the mass: position and slow rotation
-    this.spinAngle += dt * p.num('vt.spin');
+    this.spinAngle += dt * p.num(this.k('spin'));
     this.mass.rotation.y = this.spinAngle;
-    this.mass.position.y = p.num('vt.offsetY');
-    const tint = new THREE.Color(p.str('vt.matterColor'));
-    const keyCol = new THREE.Color(p.str('vt.keyColor'));
-    const rimCol = new THREE.Color(p.str('vt.rimColor'));
-    const tex = p.str('vt.woodTexture');
-    const wood = tex === 'procedural' ? 'proc:' + p.str('vt.wood') : tex;
+    this.mass.position.y = p.num(this.k('offsetY'));
+    const tint = new THREE.Color(p.str(this.k('matterColor')));
+    const keyCol = new THREE.Color(p.str(this.k('keyColor')));
+    const rimCol = new THREE.Color(p.str(this.k('rimColor')));
+    const tex = p.str(this.k('woodTexture'));
+    const wood = tex === 'procedural' ? 'proc:' + p.str(this.k('wood')) : tex;
     if (wood !== this.woodId) {
       this.woodId = wood;
-      this.setWood(tex, p.str('vt.wood'));
+      this.setWood(tex, p.str(this.k('wood')));
     }
-    this.frame.visible = p.bool('vt.frame');
-    this.floor.visible = p.bool('vt.floor');
-    const az = (p.num('vt.keyAz') * Math.PI) / 180, el = (p.num('vt.keyEl') * Math.PI) / 180;
+    this.frame.visible = p.bool(this.k('frame'));
+    this.floor.visible = p.bool(this.k('floor'));
+    const az = (p.num(this.k('keyAz')) * Math.PI) / 180, el = (p.num(this.k('keyEl')) * Math.PI) / 180;
     const keyDir = new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
     this.key.position.copy(keyDir).multiplyScalar(10);
-    this.key.intensity = p.num('vt.woodLight') * 1.6;
-    this.top.intensity = p.num('vt.woodLight') * 35 * p.num('vt.spot');
-    this.fill.intensity = 0.15 + p.num('vt.ambient') * 0.6;
+    this.key.intensity = p.num(this.k('woodLight')) * 1.6;
+    this.top.intensity = p.num(this.k('woodLight')) * 35 * p.num(this.k('spot'));
+    this.fill.intensity = 0.15 + p.num(this.k('ambient')) * 0.6;
     for (const mat of [this.fibreMat, this.dotMat]) {
       const u = mat.uniforms;
       u.tPos.value = this.gpu.getCurrentRenderTarget(this.posVar).texture;
@@ -527,92 +538,110 @@ export class VitrineWorld implements MovementInstance {
       u.tGlow.value = this.gpu.getCurrentRenderTarget(this.glowVar).texture;
       u.uSpawned.value = this.spawned;
       u.uKeyDir.value.copy(keyDir);
-      u.uKey.value = p.num('vt.key') * modScale(g, 'light', 0);
-      u.uAmbient.value = p.num('vt.ambient') * 0.3;
-      u.uRim.value = p.num('vt.rim');
-      u.uAlbedo.value.setScalar(p.num('vt.albedo'));
-      u.uSheen.value = p.num('vt.sheen');
-      u.uCrestGlow.value = p.num('vt.crestGlow');
+      u.uKey.value = p.num(this.k('key')) * modScale(g, 'light', 0);
+      u.uAmbient.value = p.num(this.k('ambient')) * 0.3;
+      u.uRim.value = p.num(this.k('rim'));
+      u.uAlbedo.value.setScalar(p.num(this.k('albedo')));
+      u.uSheen.value = p.num(this.k('sheen'));
+      u.uCrestGlow.value = p.num(this.k('crestGlow'));
       u.uVeinA.value.set(pal.a);
       u.uVeinB.value.set(pal.b);
       u.uVeinC.value.set(pal.c);
       u.uWisps.value = vu.uWisps.value;
-      u.uThick.value = p.num('vt.thickness');
+      u.uThick.value = p.num(this.k('thickness'));
       u.uTime.value = time;
-      u.uSegLen.value = p.num('vt.fibreLength');
+      u.uSegLen.value = p.num(this.k('fibreLength'));
     }
     // the body of the matter
     const mu = (this.matter.material as THREE.ShaderMaterial).uniforms;
     const nu = this.nrmVar.material.uniforms;
-    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale']) mu[k].value = nu[k].value;
+    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale', 'uBend', 'uBendFreq']) mu[k].value = nu[k].value;
     mu.uStretch.value.copy(nu.uStretch.value);
-    mu.uFlowScale.value = p.num('vt.flowScale');
+    mu.uFlowScale.value = p.num(this.k('flowScale'));
     mu.uKeyDir.value.copy(keyDir);
     mu.uKey.value = this.fibreMat.uniforms.uKey.value;
-    mu.uAmbient.value = p.num('vt.ambient') * 0.3;
-    mu.uRim.value = p.num('vt.rim');
-    mu.uAlbedo.value = p.num('vt.albedo');
+    mu.uAmbient.value = p.num(this.k('ambient')) * 0.3;
+    mu.uRim.value = p.num(this.k('rim'));
+    mu.uAlbedo.value = p.num(this.k('albedo'));
     mu.uTint.value.copy(tint);
+    mu.uPatch.value = p.num(this.k('patch'));
+    mu.uPatchScale.value = p.num(this.k('patchScale'));
+    mu.uPatchCover.value = p.num(this.k('patchCover'));
+    mu.uCells.value = p.num(this.k('cells'));
+    mu.uCellScale.value = p.num(this.k('cellScale'));
     mu.uKeyCol.value.copy(keyCol);
     mu.uRimCol.value.copy(rimCol);
-    mu.uSheen.value = p.num('vt.sheen');
-    mu.uCrestGlow.value = p.num('vt.crestGlow');
+    mu.uSheen.value = p.num(this.k('sheen'));
+    mu.uCrestGlow.value = p.num(this.k('crestGlow'));
     mu.uVeinA.value.set(pal.a);
     mu.uVeinB.value.set(pal.b);
     mu.uVeinC.value.set(pal.c);
     mu.uGrowth.value = this.spawned;
-    mu.uStreak.value = p.num('vt.streaks');
-    mu.uStripes.value = p.num('vt.strandDensity') * (this.height / 1080);
+    mu.uStreak.value = p.num(this.k('streaks'));
+    mu.uStripes.value = p.num(this.k('strandDensity')) * (this.height / 1080);
     mu.uNumSrc.value = live.length;
-    this.matter.visible = p.bool('vt.body');
+    this.matter.visible = p.bool(this.k('body'));
 
     // the strands
-    const nStr = parseInt(p.str('vt.strands'), 10) || 0;
+    const nStr = parseInt(p.str(this.k('strands')), 10) || 0;
     this.strands.mesh.visible = nStr > 0;
     if (nStr > 0) {
       this.strands.setCount(nStr);
       const tu = this.strands.traceMat.uniforms;
-      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale']) tu[k].value = nu[k].value;
+      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale', 'uBend', 'uBendFreq']) tu[k].value = nu[k].value;
       tu.uStretch.value.copy(nu.uStretch.value);
-      tu.uStep.value = p.num('vt.strandLength') / 15;
-      tu.uContour.value = p.num('vt.contour');
-      tu.uSweep.value = p.num('vt.sweep');
-      tu.uWispShare.value = p.num('vt.smokeStrands');
-      tu.uWispLift.value = p.num('vt.smokeLift');
-      tu.uWispTurb.value = p.num('vt.smokeCurl') * modScale(g, 'wisps', 0.2);
-      tu.uWispLen.value = p.num('vt.smokeLength');
+      tu.uStep.value = p.num(this.k('strandLength')) / 15;
+      tu.uContour.value = p.num(this.k('contour'));
+      tu.uSweep.value = p.num(this.k('sweep'));
+      tu.uWispShare.value = p.num(this.k('smokeStrands'));
+      tu.uWispLift.value = p.num(this.k('smokeLift'));
+      tu.uWispTurb.value = p.num(this.k('smokeCurl')) * modScale(g, 'wisps', 0.2);
+      tu.uWispLen.value = p.num(this.k('smokeLength'));
       this.strands.trace();
       const su = this.strands.material.uniforms;
       su.uRes.value.set(this.width, this.height);
-      su.uWidth.value = p.num('vt.strandWidth') * (this.height / 1080);
+      su.uWidth.value = p.num(this.k('strandWidth')) * (this.height / 1080);
       su.uGrowth.value = this.spawned;
-      su.uLayer.value = p.num('vt.thickness') * 0.15;
-      su.uMaxSeg.value = (p.num('vt.strandLength') / 15) * Math.max(2.5, p.num('vt.smokeLength') * 1.8);
+      su.uLayer.value = p.num(this.k('thickness')) * 0.15;
+      su.uMaxSeg.value = (p.num(this.k('strandLength')) / 15) * Math.max(2.5, p.num(this.k('smokeLength')) * 1.8);
       su.uWispShare.value = tu.uWispShare.value;
-      su.uWispAlpha.value = p.num('vt.smokeOpacity');
-      this.strands.wispMesh.visible = p.num('vt.smokeStrands') > 0.001;
+      su.uWispAlpha.value = p.num(this.k('smokeOpacity'));
+      this.strands.wispMesh.visible = p.num(this.k('smokeStrands')) > 0.001;
       su.uKeyDir.value.copy(keyDir);
       su.uKey.value = mu.uKey.value * 1.25;
-      su.uAmbient.value = p.num('vt.ambient') * 0.3;
-      su.uAlbedo.value = p.num('vt.albedo') * 1.15;
-      su.uGloss.value = p.num('vt.gloss');
-      su.uSheen.value = p.num('vt.sheen') * 1.4;
-      su.uRim.value = p.num('vt.rim');
-      su.uCrestGlow.value = p.num('vt.crestGlow');
-      su.uVeinShare.value = p.num('vt.veinShare');
+      su.uAmbient.value = p.num(this.k('ambient')) * 0.3;
+      su.uAlbedo.value = p.num(this.k('albedo')) * 1.15;
+      su.uGloss.value = p.num(this.k('gloss'));
+      su.uSheen.value = p.num(this.k('sheen')) * 1.4;
+      su.uRim.value = p.num(this.k('rim'));
+      su.uCrestGlow.value = p.num(this.k('crestGlow'));
+      su.uVeinShare.value = p.num(this.k('veinShare'));
       su.uTint.value.copy(tint);
       su.uKeyCol.value.copy(keyCol);
       su.uRimCol.value.copy(rimCol);
-      su.uSmokeCol.value.set(p.str('vt.smokeColor'));
-      su.uSmokeTint.value = p.num('vt.smokeTint');
-      su.uWarmShare.value = p.num('vt.warmShare');
-      su.uFrontFade.value = p.num('vt.frontFade');
-      su.uVeinLo.value = p.num('vt.veinThreshold');
-      su.uVeinHi.value = Math.min(0.999, p.num('vt.veinThreshold') + 0.12);
-      su.uPulse.value = p.num('vt.pulse');
-      su.uToneVar.value = p.num('vt.toneVar');
-      su.uSmokeBright.value = p.num('vt.smokeBright');
-      su.uSmokeWidth.value = p.num('vt.smokeWidth');
+      su.uSmokeCol.value.set(p.str(this.k('smokeColor')));
+      su.uSmokeTint.value = p.num(this.k('smokeTint'));
+      su.uWarmShare.value = p.num(this.k('warmShare'));
+      su.uFrontFade.value = p.num(this.k('frontFade'));
+      su.uVeinLo.value = p.num(this.k('veinThreshold'));
+      su.uVeinHi.value = Math.min(0.999, p.num(this.k('veinThreshold')) + 0.12);
+      su.uPulse.value = p.num(this.k('pulse'));
+      su.uToneVar.value = p.num(this.k('toneVar'));
+      su.uSmokeBright.value = p.num(this.k('smokeBright'));
+      su.uSmokeWidth.value = p.num(this.k('smokeWidth'));
+      su.uCells.value = p.num(this.k('cells'));
+      su.uPatch.value = p.num(this.k('patch'));
+      su.uPatchScale.value = p.num(this.k('patchScale'));
+      su.uPatchCover.value = p.num(this.k('patchCover'));
+      // webs hang between traced strand roots
+      this.webs.setCount(p.num(this.k('webs')));
+      const wu = this.webs.material.uniforms;
+      wu.tPos.value = su.tPos.value;
+      wu.tNrm.value = su.tNrm.value;
+      wu.uCount.value = this.strands.count;
+      wu.uAlpha.value = p.num(this.k('webOpacity'));
+      wu.uColor.value.set(p.str(this.k('webColor')));
+      wu.uTime.value = time;
       su.uTime.value = time;
       su.uVeinA.value.set(pal.a);
       su.uVeinB.value.set(pal.b);
@@ -626,10 +655,10 @@ export class VitrineWorld implements MovementInstance {
 
     // more particles → each one fainter, so the mass keeps its density
     const norm = Math.sqrt(262144 / (count * count));
-    this.fibreMat.uniforms.uOpacity.value = p.num('vt.fibreOpacity') * norm;
-    this.dotMat.uniforms.uOpacity.value = p.num('vt.dotOpacity') * norm;
-    this.dotMat.uniforms.uDotSize.value = p.num('vt.dotSize') * (this.height / 1080);
-    this.dots.visible = p.num('vt.dotOpacity') > 0.001;
+    this.fibreMat.uniforms.uOpacity.value = p.num(this.k('fibreOpacity')) * norm;
+    this.dotMat.uniforms.uOpacity.value = p.num(this.k('dotOpacity')) * norm;
+    this.dotMat.uniforms.uDotSize.value = p.num(this.k('dotSize')) * (this.height / 1080);
+    this.dots.visible = p.num(this.k('dotOpacity')) > 0.001;
 
     // ---- camera
     for (const pt of pointers) {
@@ -640,25 +669,25 @@ export class VitrineWorld implements MovementInstance {
     const phraseEnded = this.phraseNotes >= 6 && time - this.lastNote > 1;
     if (phraseEnded) this.phraseNotes = 0;
     const cam = this.camera;
-    const fov = p.num('vt.fov');
+    const fov = p.num(this.k('fov'));
     cam.fov = fov;
     cam.aspect = this.width / this.height;
-    const mode = p.str('vt.camera');
+    const mode = p.str(this.k('camera'));
     if (mode === 'gallery') {
       // the museum view: frame filling the picture, a slow breathing sway
       const hfov = 2 * Math.atan(Math.tan((fov * Math.PI) / 360) * cam.aspect);
       const fitW = (this.fd.w / 2 + 0.55) / Math.tan(hfov / 2);
       const fitH = (this.fd.h / 2 + 0.35) / Math.tan((fov * Math.PI) / 360);
       // fit the front face of the vitrine (it is nearer the lens than the centre)
-      const dist = (Math.max(fitW, fitH) + this.fd.d / 2) * this.userZoom * p.num('vt.zoom');
-      const sway = p.num('vt.sway');
+      const dist = (Math.max(fitW, fitH) + this.fd.d / 2) * this.userZoom * p.num(this.k('zoom'));
+      const sway = p.num(this.k('sway'));
       const yaw = this.userYaw + simplex3(time * 0.02, 1.1, 0) * 0.12 * sway;
-      const pitch = this.userPitch + p.num('vt.camHeight') + simplex3(time * 0.017, 4.2, 0) * 0.04 * sway;
+      const pitch = this.userPitch + p.num(this.k('camHeight')) + simplex3(time * 0.017, 4.2, 0) * 0.04 * sway;
       cam.position.set(Math.sin(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist);
       cam.lookAt(0, 0, 0);
     } else {
       this.director.update({
-        dt, time, mode, pace: p.num('vt.camSpeed'), closeness: 0.7, revealTime: 30, handheld: p.num('vt.sway') * 0.5, react: 0.5,
+        dt, time, mode, pace: p.num(this.k('camSpeed')), closeness: 0.7, revealTime: 30, handheld: p.num(this.k('sway')) * 0.5, react: 0.5,
         fov, extent: new THREE.Vector3(this.fd.w / 2, this.fd.h / 2, this.fd.d / 2), focus: this.focus, focusAxis: 1, centroid: this.centroid,
         loudness: sig.loudness, density: sig.density, pulse: sig.pulse, energy: clamp((modScale(g, 'camera', 0) - 1) * 0.8, 0, 2),
         distanceMod: 0, phraseEnded, newLine: null, lattice: [[-1.5, 0, 1.5], [-0.8, 0, 0.8], [-0.6, 0, 0.6]],
@@ -684,7 +713,7 @@ export class VitrineWorld implements MovementInstance {
   }
 
   clear() {
-    this.spawned = this.ctx.params.num('vt.startFill');
+    this.spawned = this.ctx.params.num(this.k('startFill'));
     for (const s of this.sources) if (s.held) { s.held = false; s.released = 0; }
     this.userYaw = 0;
     this.userPitch = 0;
@@ -700,6 +729,7 @@ export class VitrineWorld implements MovementInstance {
     this.dots.geometry.dispose();
     this.matter.geometry.dispose();
     this.strands.dispose();
+    this.webs.dispose();
     (this.matter.material as THREE.Material).dispose();
     this.fibreMat.dispose();
     this.dotMat.dispose();
