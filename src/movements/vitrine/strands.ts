@@ -143,7 +143,10 @@ void main() {
   vN = Nn.xyz;
   vT = T;
   vP = p;
-  vCrest = P.w;
+  // a glowing strand lights along its length: use the highest crest it passes over
+  float cmax = 0.0;
+  for (int j = 0; j < ${K}; j++) cmax = max(cmax, texelFetch(tPos, ivec2(col * ${K} + j, row), 0).w);
+  vCrest = mix(P.w, cmax, 0.7);
   vValley = Nn.w;
 }
 `;
@@ -186,15 +189,16 @@ void main() {
   vec3 Nt = normalize(N * tube + B * v);
   vec3 V = normalize(cameraPosition - vP);
   vec3 L = normalize(uKeyDir);
-  float wrap = max(dot(Nt, L) * 0.6 + 0.4, 0.0);
-  float diff = wrap * wrap;
+  float wrap = max(dot(Nt, L) * 0.72 + 0.28, 0.0);
+  float big = max(dot(N, L) * 0.5 + 0.5, 0.0);
+  float diff = wrap * wrap * (0.45 + 0.75 * big);
   vec3 H = normalize(L + V);
   float th = dot(T, H);
   float spec = pow(sqrt(max(1.0 - th * th, 0.0)), uGloss) * uSheen;
   float rim = pow(1.0 - abs(dot(N, V)), 3.0) * uRim;
   float valley = smoothstep(-0.55, 0.45, vValley);
   float ao = mix(0.22, 1.0, valley);
-  float tone = uAlbedo * (0.8 + 0.4 * hh(vec2(vSeed * 0.11, 2.0)));
+  float tone = uAlbedo * 0.85 * (0.8 + 0.4 * hh(vec2(vSeed * 0.11, 2.0)));
   vec3 col = vec3(tone) * (uAmbient + diff * uKey) * ao * (0.62 + 0.38 * tube);
   col += vec3(0.92, 0.95, 1.0) * spec * uKey * 0.3 * ao * tube;
   col += vec3(0.5, 0.55, 0.65) * rim * 0.06 * tube;
@@ -203,8 +207,8 @@ void main() {
   float isVein = step(hh(vec2(vSeed * 0.07, 8.3)), uVeinShare);
   float region = fract(sin(dot(floor(vP * 1.6), vec3(12.9, 78.2, 37.7))) * 43758.5);
   vec3 vein = region < 0.45 ? uVeinA : region < 0.75 ? uVeinB : uVeinC;
-  float crest = smoothstep(0.82, 0.975, vCrest);
-  float pulse = 0.65 + 0.35 * sin(vU * 12.0 - uTime * 1.1 + vSeed * 0.013);
+  float crest = smoothstep(0.78, 0.96, vCrest);
+  float pulse = 0.8 + 0.2 * sin(vU * 3.0 - uTime * 0.6 + vSeed * 0.013);
   vec3 emis = vein * crest * uCrestGlow * (isVein * 2.2 + 0.04) * pulse;
   for (int i = 0; i < ${MAX_SOURCES}; i++) {
     if (i >= uNumSrc) break;
@@ -213,7 +217,7 @@ void main() {
     float fall = exp(-dot(dd, dd) / (r * r));
     emis += uSrcCol[i].rgb * uSrcCol[i].a * fall * (0.04 + isVein * 1.3 + crest * 0.3);
   }
-  fragColor = vec4(col + emis * (0.4 + 0.6 * tube), 1.0);
+  fragColor = vec4(col + emis * (0.55 + 0.45 * tube), 1.0);
 }
 `;
 
