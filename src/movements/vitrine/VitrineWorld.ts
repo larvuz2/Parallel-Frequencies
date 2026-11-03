@@ -494,8 +494,9 @@ export class VitrineWorld implements MovementInstance {
       su.uWidth.value = p.num('vt.strandWidth') * (this.height / 1080);
       su.uGrowth.value = this.spawned;
       su.uLayer.value = p.num('vt.thickness') * 0.15;
+      su.uMaxSeg.value = (p.num('vt.strandLength') / 15) * 2.5;
       su.uKeyDir.value.copy(keyDir);
-      su.uKey.value = mu.uKey.value;
+      su.uKey.value = mu.uKey.value * 1.25;
       su.uAmbient.value = p.num('vt.ambient') * 0.3;
       su.uAlbedo.value = p.num('vt.albedo') * 1.15;
       su.uGloss.value = p.num('vt.gloss');
@@ -509,9 +510,9 @@ export class VitrineWorld implements MovementInstance {
       su.uVeinC.value.set(pal.c);
       su.uNumSrc.value = live.length;
       // with strands on, the body underneath is a dark filler between them
-      mu.uStreak.value *= 0.35;
-      mu.uCrestGlow.value *= 0.35;
-      mu.uAlbedo.value *= 0.7;
+      mu.uStreak.value *= 0.08;
+      mu.uCrestGlow.value *= 0.12;
+      mu.uAlbedo.value *= 0.55;
     }
 
     // more particles → each one fainter, so the mass keeps its density

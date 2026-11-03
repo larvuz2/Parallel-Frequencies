@@ -90,6 +90,7 @@ uniform vec2 uRes;
 uniform float uWidth;
 uniform float uGrowth;
 uniform float uLayer;
+uniform float uMaxSeg;
 in float aIdx;
 out float vV;
 out float vU;
@@ -118,7 +119,7 @@ void main() {
   float m = 0.5 + 0.5 * snoise3(d0 * 1.8 + 3.0);
   float edge = uGrowth * 1.15 - m;
   float reach = clamp(edge / 0.15, 0.0, 1.0);
-  if (edge <= 0.0 || u > reach || dot(Nn.xyz, Nn.xyz) < 0.5 || dot(T, T) < 1e-10) {
+  if (edge <= 0.0 || u > reach || dot(Nn.xyz, Nn.xyz) < 0.5 || dot(T, T) < 1e-10 || length(T) > uMaxSeg) {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     return;
   }
@@ -193,8 +194,8 @@ void main() {
   float rim = pow(1.0 - abs(dot(N, V)), 3.0) * uRim;
   float valley = smoothstep(-0.55, 0.45, vValley);
   float ao = mix(0.22, 1.0, valley);
-  float tone = uAlbedo * (0.65 + 0.7 * hh(vec2(vSeed * 0.11, 2.0)));
-  vec3 col = vec3(tone) * (uAmbient + diff * uKey) * ao * (0.5 + 0.5 * tube);
+  float tone = uAlbedo * (0.8 + 0.4 * hh(vec2(vSeed * 0.11, 2.0)));
+  vec3 col = vec3(tone) * (uAmbient + diff * uKey) * ao * (0.62 + 0.38 * tube);
   col += vec3(0.92, 0.95, 1.0) * spec * uKey * 0.3 * ao * tube;
   col += vec3(0.5, 0.55, 0.65) * rim * 0.06 * tube;
 
@@ -202,9 +203,9 @@ void main() {
   float isVein = step(hh(vec2(vSeed * 0.07, 8.3)), uVeinShare);
   float region = fract(sin(dot(floor(vP * 1.6), vec3(12.9, 78.2, 37.7))) * 43758.5);
   vec3 vein = region < 0.45 ? uVeinA : region < 0.75 ? uVeinB : uVeinC;
-  float crest = smoothstep(0.86, 0.985, vCrest);
+  float crest = smoothstep(0.82, 0.975, vCrest);
   float pulse = 0.65 + 0.35 * sin(vU * 12.0 - uTime * 1.1 + vSeed * 0.013);
-  vec3 emis = vein * crest * uCrestGlow * (isVein * 1.8 + 0.05) * pulse;
+  vec3 emis = vein * crest * uCrestGlow * (isVein * 2.2 + 0.04) * pulse;
   for (int i = 0; i < ${MAX_SOURCES}; i++) {
     if (i >= uNumSrc) break;
     vec3 dd = vP - uSrcPos[i].xyz;
@@ -251,7 +252,7 @@ export class Strands {
       fragmentShader: STRAND_FRAG,
       uniforms: {
         tPos: { value: null }, tNrm: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uWidth: { value: 2 }, uGrowth: { value: 1 },
-        uLayer: { value: 0.03 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
+        uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
         uGloss: { value: 40 }, uSheen: { value: 0.4 }, uRim: { value: 0.6 }, uCrestGlow: { value: 1 }, uVeinShare: { value: 0.12 }, uTime: { value: 0 },
         uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
         uNumSrc: { value: 0 }, uSrcPos: { value: [] }, uSrcForce: { value: [] }, uSrcCol: { value: [] },

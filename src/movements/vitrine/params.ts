@@ -99,11 +99,11 @@ export const VITRINE_PARAMS: ParamDef[] = [
       { value: '131072', label: '131 thousand' },
     ],
   },
-  { key: 'vt.strandWidth', label: 'Strand width', group: 'fibres', type: 'range', min: 0.5, max: 8, step: 0.05, default: 2.6, format: (v) => `${x2(v)} px` },
+  { key: 'vt.strandWidth', label: 'Strand width', group: 'fibres', type: 'range', min: 0.5, max: 8, step: 0.05, default: 3.6, format: (v) => `${x2(v)} px` },
   { key: 'vt.strandLength', label: 'Strand length', group: 'fibres', type: 'range', min: 0.1, max: 2, step: 0.01, default: 0.7, format: x2 },
   { key: 'vt.contour', label: 'Follow the folds', group: 'fibres', type: 'range', min: 0, max: 2, step: 0.01, default: 0.7, format: x2, hint: 'How much strands bend to run along the folds rather than straight across them.' },
   { key: 'vt.sweep', label: 'Comb waviness', group: 'fibres', type: 'range', min: 0, max: 2, step: 0.01, default: 0.9, format: x2, hint: 'How much the overall combing direction wanders across the form.' },
-  { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.14, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
+  { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.22, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
   { key: 'vt.gloss', label: 'Strand gloss', group: 'light', type: 'range', min: 4, max: 120, step: 1, default: 36 },
 
   /* light */
