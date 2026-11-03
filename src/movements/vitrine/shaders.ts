@@ -291,7 +291,7 @@ void main() {
   float crestLine = smoothstep(0.9, 0.995, crest) * (0.5 + 0.5 * sin(uTime * 0.4 + region * 20.0));
   vec3 emis = vein * crestLine * uCrestGlow * 0.15 + glow * 0.22;
 
-  float alpha = uOpacity * (wisp ? 0.06 : 0.7);
+  float alpha = uOpacity * (wisp ? 0.13 : 0.7);
   if (wisp) alpha *= 0.15 + 0.85 * smoothstep(0.35, 1.2, length(pos.xyz) - 1.0);
   #ifndef DOTS
   if (wisp) alpha = 0.0;   // smoke is drawn as soft sprites only

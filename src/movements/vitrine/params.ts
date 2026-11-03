@@ -51,8 +51,8 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0006, format: (v) => `${(v * 100).toFixed(2)}%/s` },
 
   /* form */
-  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.4, format: x2 },
-  { key: 'vt.width', label: 'Width', group: 'form', type: 'range', min: 0.8, max: 1.8, step: 0.01, default: 1.12, format: (v) => `${x2(v)}×` },
+  { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.5, format: x2 },
+  { key: 'vt.width', label: 'Width', group: 'form', type: 'range', min: 0.8, max: 1.8, step: 0.01, default: 1.05, format: (v) => `${x2(v)}×` },
   { key: 'vt.folds', label: 'Crumple', group: 'form', type: 'range', min: 0, max: 1.2, step: 0.01, default: 0.45, format: x2, hint: 'Depth of the folds. Loudness deepens them (see Mapping).' },
   { key: 'vt.foldScale', label: 'Fold size', group: 'form', type: 'range', min: 0.3, max: 2.5, step: 0.01, default: 1.2, format: x2, hint: 'Small values: a few large folds. Large values: many small creases.' },
   { key: 'vt.warp', label: 'Twist of folds', group: 'form', type: 'range', min: 0, max: 2, step: 0.01, default: 0.9, format: x2 },
@@ -103,7 +103,7 @@ export const VITRINE_PARAMS: ParamDef[] = [
   { key: 'vt.strandLength', label: 'Strand length', group: 'fibres', type: 'range', min: 0.1, max: 2, step: 0.01, default: 0.7, format: x2 },
   { key: 'vt.contour', label: 'Follow the folds', group: 'fibres', type: 'range', min: 0, max: 2, step: 0.01, default: 0.7, format: x2, hint: 'How much strands bend to run along the folds rather than straight across them.' },
   { key: 'vt.sweep', label: 'Comb waviness', group: 'fibres', type: 'range', min: 0, max: 2, step: 0.01, default: 0.9, format: x2, hint: 'How much the overall combing direction wanders across the form.' },
-  { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.12, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
+  { key: 'vt.veinShare', label: 'Glowing strands', group: 'glow', type: 'range', min: 0, max: 0.6, step: 0.005, default: 0.17, format: pct, hint: 'Share of strands that carry light along the fold crests.' },
   { key: 'vt.gloss', label: 'Strand gloss', group: 'light', type: 'range', min: 4, max: 120, step: 1, default: 36 },
 
   /* light */

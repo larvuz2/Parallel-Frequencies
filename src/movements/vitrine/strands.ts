@@ -212,9 +212,9 @@ void main() {
   float isVein = step(hh(vec2(vSeed * 0.07, 8.3)), uVeinShare);
   float region = vRegion;
   vec3 vein = region < 0.5 ? uVeinA : region < 0.68 ? uVeinB : uVeinC;
-  float crest = smoothstep(0.9, 0.985, vCrest);
+  float crest = smoothstep(0.86, 0.98, vCrest);
   float pulse = 0.8 + 0.2 * sin(vU * 3.0 - uTime * 0.6 + vSeed * 0.013);
-  vec3 emis = vein * crest * uCrestGlow * (isVein * 1.7 + 0.03) * pulse;
+  vec3 emis = vein * crest * uCrestGlow * (isVein * 2.4 + 0.03) * pulse;
   for (int i = 0; i < ${MAX_SOURCES}; i++) {
     if (i >= uNumSrc) break;
     vec3 dd = vP - uSrcPos[i].xyz;
