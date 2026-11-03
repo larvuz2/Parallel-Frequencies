@@ -100,6 +100,7 @@ out vec3 vT;
 out vec3 vP;
 out float vCrest;
 out float vValley;
+out float vRegion;
 void main() {
   int k = int(position.x + 0.5);
   float side = position.y;
@@ -146,7 +147,10 @@ void main() {
   // a glowing strand lights along its length: use the highest crest it passes over
   float cmax = 0.0;
   for (int j = 0; j < ${K}; j++) cmax = max(cmax, texelFetch(tPos, ivec2(col * ${K} + j, row), 0).w);
-  vCrest = mix(P.w, cmax, 0.7);
+  vCrest = mix(P.w, cmax, 0.5);
+  // colour family of the strand: a smooth field sampled at its middle point
+  vec3 Pm = texelFetch(tPos, ivec2(col * ${K} + ${K >> 1}, row), 0).xyz;
+  vRegion = 0.5 + 0.5 * snoise3(Pm * 0.75 + 2.3);
   vValley = Nn.w;
 }
 `;
@@ -180,6 +184,7 @@ in vec3 vT;
 in vec3 vP;
 in float vCrest;
 in float vValley;
+in float vRegion;
 void main() {
   float v = clamp(vV, -1.0, 1.0);
   float tube = sqrt(max(1.0 - v * v, 0.0));
@@ -205,11 +210,11 @@ void main() {
 
   // veins: a share of the strands glow where they ride over a fold crest
   float isVein = step(hh(vec2(vSeed * 0.07, 8.3)), uVeinShare);
-  float region = fract(sin(dot(floor(vP * 1.6), vec3(12.9, 78.2, 37.7))) * 43758.5);
-  vec3 vein = region < 0.45 ? uVeinA : region < 0.75 ? uVeinB : uVeinC;
-  float crest = smoothstep(0.78, 0.96, vCrest);
+  float region = vRegion;
+  vec3 vein = region < 0.5 ? uVeinA : region < 0.68 ? uVeinB : uVeinC;
+  float crest = smoothstep(0.9, 0.985, vCrest);
   float pulse = 0.8 + 0.2 * sin(vU * 3.0 - uTime * 0.6 + vSeed * 0.013);
-  vec3 emis = vein * crest * uCrestGlow * (isVein * 2.2 + 0.04) * pulse;
+  vec3 emis = vein * crest * uCrestGlow * (isVein * 1.7 + 0.03) * pulse;
   for (int i = 0; i < ${MAX_SOURCES}; i++) {
     if (i >= uNumSrc) break;
     vec3 dd = vP - uSrcPos[i].xyz;
