@@ -33,8 +33,6 @@ export interface AppApi {
   resetAll(): void;
 }
 
-/** Keys shown in the Style section instead of their own group. */
-const FEATURED = ['im.palette', 'im.groundTone', 'im.ground'];
 
 export class Sidebar {
   readonly el: HTMLElement;
@@ -99,7 +97,7 @@ export class Sidebar {
 
     const groups: ParamGroup[] = [...(m.groups ?? [])];
     const defs = p.allDefs();
-    for (const g of groups) this.body.append(this.groupSection(g, defs.filter((d) => d.group === g.id && !d.hidden && !FEATURED.includes(d.key))));
+    for (const g of groups) this.body.append(this.groupSection(g, defs.filter((d) => d.group === g.id && !d.hidden && !(m.featured ?? []).includes(d.key))));
     this.body.append(this.section('mapping', 'Mapping', 'What in the music drives what on the canvas.', this.mappingPanel(), true));
     for (const g of ENGINE_GROUPS) this.body.append(this.groupSection(g, defs.filter((d) => d.group === g.id && !d.hidden)));
     this.body.append(this.section('library', 'Library', 'Save, share and restore your settings.', this.libraryPanel(), true));
@@ -155,7 +153,7 @@ export class Sidebar {
     const demo = h('button', { class: 'btn', type: 'button' });
     demo.innerHTML = `${ICONS.play}<span>Play demo</span>`;
     demo.addEventListener('click', () => this.app.playDemo());
-    withHint(demo, 'Demo', 'An algorithmic study in Debussy’s idiom: the faun’s flute arabesque, planed ninth chords, whole-tone mist and sunken bells.');
+    withHint(demo, 'Demo', this.app.movement.demoDescription ?? 'A built-in piece to try the movement.');
     return h(
       'div',
       { class: 'ctl-list' },
@@ -216,14 +214,14 @@ export class Sidebar {
     rnd.innerHTML = `${ICONS.dice}<span>Surprise me</span>`;
     rnd.addEventListener('click', () => this.app.randomise());
     withHint(rnd, 'Surprise me', 'A new random variation within tasteful ranges — palette, brush, composition, light. Values glide.');
-    const presetRow = withHint(h('div', { class: 'ctl ctl-select' }, h('label', { text: 'Preset' }), this.presetDd.el), 'Preset', 'Variations of Impressionism and its neighbours. Switching glides smoothly — safe to use during a performance. Use [ and ] to step through.');
+    const presetRow = withHint(h('div', { class: 'ctl ctl-select' }, h('label', { text: 'Preset' }), this.presetDd.el), 'Preset', `Variations of ${this.app.movement.title}. Switching glides smoothly — safe to use during a performance. Use [ and ] to step through.`);
     return h(
       'div',
       { class: 'ctl-list' },
       presetRow,
       this.presetDesc,
       h('div', { class: 'btn-row' }, rnd, save),
-      ...FEATURED.map((k) => this.ctl(k)),
+      ...(this.app.movement.featured ?? []).map((k) => this.ctl(k)),
     );
   }
 

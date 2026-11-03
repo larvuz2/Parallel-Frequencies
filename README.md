@@ -4,9 +4,16 @@
 historical art movement is paired with its closest musical equivalent. Music played live on a MIDI
 keyboard, or from a MIDI or audio file, paints a living canvas.
 
-The first movement is **Impressionism — Monet × Debussy**. Every note becomes a brushstroke. The
-stroke is pressed, dragged and lifted by the music, on a lit, textured canvas with drifting air in
-front of it.
+Live movements:
+
+- **Impressionism — Monet × Debussy.** Every note becomes a brushstroke. The stroke is pressed,
+  dragged and lifted by the music, on a lit, textured canvas with drifting air in front of it.
+- **De Stijl — Mondrian × Mozart (3D).** The music builds a De Stijl construction in space. Notes
+  open planes and blocks on an asymmetric lattice, their edges draw black lines outward, and small
+  blocks of colour run along the lines like Broadway traffic. A camera director films it with
+  grazing close-ups that slowly open out to reveal the whole architecture.
+
+Switch movements with the title dropdown, `M`, or `?movement=neoplasticism` in the URL.
 
 ---
 
@@ -42,6 +49,8 @@ the computer-keyboard piano all work there.
 | `S` | Save a PNG |
 | `R` | Record video (with sound) |
 | `D` / `O` | Play demo / open file |
+| `M` | Next movement |
+| `1`–`7` | *(De Stijl)* switch camera move live |
 
 When the **computer-keyboard piano** is on, `A W S E D F T G Y H U J K` play notes, `Z`/`X` shift the
 octave and `Space` is the sustain pedal. Shortcuts then need `Shift`.
@@ -96,6 +105,31 @@ motes float in front of it, and the image is finished with bloom, vignette, grai
 
 ---
 
+## De Stijl: how the music becomes architecture
+
+| Music | Construction |
+| --- | --- |
+| **Pitch** | Floor (height) of the form; the column comes from the circle of fifths, so related notes are neighbours |
+| **Hands / channel** | Depth layer: the left hand (Alberti bass) builds at the back, the melody in front |
+| **Velocity + duration** | Size of the form (cells spanned), line weight, and how far a held form slides forward out of the grid (*key relief*) |
+| **Colour** | *Equilibrium*: each new colour is the one the composition lacks most, after Mondrian's balance. Other modes: harmony (tonic red, third yellow, fifth blue), register, pitch class, velocity |
+| **Each note** | Its form's edges draw lines outward (merging with existing lines), and a small block of colour runs along one line (Broadway Boogie Woogie) |
+| **Loud chords** | A cadence: the whole structure breathes together |
+| **Silences** | Phrase endings: the camera cuts to a new view or a new close-up |
+
+**Camera moves** (keys `1`–`7`):
+
+1. **Close-up → reveal.** Grazes along the newest line, then pulls back over *Reveal duration*.
+2. **Follow the line.** A low tracking shot along each line as it is drawn.
+3. **Fly through the grid.** Travels the lattice corridors.
+4. **Phrase cuts.** Classical axonometric views, changing at phrase ends.
+5. **Slow orbit.**
+6. **Breathing with dynamics.** Close when soft, wide when loud.
+7. **Still axonometric.**
+
+Dragging always turns the view and the mouse wheel zooms, on top of any move. Forms near the lens
+dissolve so the camera can pass through them, and depth of field follows the subject.
+
 ## Architecture
 
 ```
@@ -116,8 +150,9 @@ src/
     AudioEngine.ts     sampled grand (Salamander, bundled) + hall reverb, pedal logic
     DemoComposer.ts    "Rêverie" — algorithmic Debussy-style demo / idle dream
   movements/
-    registry.ts        all 19 movements (Impressionism live, others to come)
+    registry.ts        all movements (Impressionism and De Stijl live, others to come)
     impressionism/     params, presets, palettes, brush system, surface, shaders, atmosphere
+    neoplasticism/     De Stijl: lattice world, camera director, depth of field, Mozart demo
   ui/                  schema-driven sidebar, dropdowns, transport bar, recorder
 ```
 

@@ -1,6 +1,7 @@
 import type * as THREE from 'three';
 import type { ParamStore } from './ParamStore';
 import type { Signals } from './Signals';
+import type { Sequence } from '../input/MidiFilePlayer';
 
 /* ------------------------------------------------------------------ */
 /*  Musical events                                                     */
@@ -186,5 +187,18 @@ export interface MovementDefinition {
   presets?: Preset[];
   modTargets?: ModTarget[];
   defaultRoutes?: ModRoute[];
+  /** Parameter keys shown in the Style section (palette, background…) instead of their own group. */
+  featured?: string[];
+  /** Keys a preset switch never resets (installation / hardware preferences). */
+  keepOnPreset?: string[];
+  /** Engine-level defaults this movement prefers (tone mapping, drift…), applied on first run. */
+  engineDefaults?: Partial<ParamValues>;
+  /** A random variation for "Surprise me". */
+  randomise?(params: ParamValues): Partial<ParamValues>;
+  /** Is the current background dark? Used to colour text drawn over the canvas. */
+  isDark?(params: Readonly<ParamValues>): boolean;
+  /** The movement's own demo piece. */
+  demo?(seed: number): Sequence;
+  demoDescription?: string;
   create?(ctx: EngineContext): MovementInstance;
 }

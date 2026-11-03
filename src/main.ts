@@ -10,7 +10,7 @@ import { Engine } from './core/Engine';
 import { ParamStore } from './core/ParamStore';
 import { ENGINE_PARAMS } from './core/engineParams';
 import type { ModRoute, MovementDefinition, ParamValues, Preset } from './core/types';
-import { movementById } from './movements/registry';
+import { MOVEMENTS, movementById } from './movements/registry';
 import { AudioEngine } from './input/AudioEngine';
 import { MidiInput } from './input/MidiInput';
 import { KeyboardInput } from './input/KeyboardInput';
@@ -44,13 +44,16 @@ class App implements AppApi {
 
   constructor() {
     const root = document.getElementById('app')!;
-    this.movement = movementById(localStorage.getItem('pf:movement') ?? 'impressionism');
+    const fromUrl = new URLSearchParams(location.search).get('movement');
+    if (fromUrl) localStorage.setItem('pf:movement', fromUrl);
+    this.movement = movementById(fromUrl ?? localStorage.getItem('pf:movement') ?? 'impressionism');
     this.params.storageKey = `pf:params:${this.movement.id}`;
     this.params.register(ENGINE_PARAMS);
     this.params.register(this.movement.params ?? []);
     this.presetId = localStorage.getItem(`pf:preset:${this.movement.id}`) ?? '';
     const restored = this.params.load();
     if (!restored) {
+      this.params.apply(this.movement.engineDefaults ?? {});
       const first = this.movement.presets?.[0];
       if (first) {
         this.params.applyPreset(first);
@@ -84,7 +87,7 @@ class App implements AppApi {
       'div',
       { class: 'welcome' },
       h('div', { class: 'w-line', text: 'Play a note, drop a score or a recording —' }),
-      h('div', { class: 'w-sub', text: 'or press D to hear Rêverie' }),
+      h('div', { class: 'w-sub', text: 'or press D for the demo' }),
     );
     const off = this.engine.bus.subscribe({ noteOn: () => { welcome.classList.add('gone'); off(); } });
     root.append(this.hud, welcome, this.sidebar.el, this.bar.el, reopen, this.toastEl, this.statsEl, this.dropOverlay());
@@ -151,17 +154,9 @@ class App implements AppApi {
     });
     this.statsEl.classList.toggle('hidden', !this.params.bool('quality.fps'));
 
-    // text drawn over the canvas adapts to the brightness of the ground
-    const tone = () => {
-      const opt = this.params.def('im.groundTone');
-      const cur = this.params.v['im.groundTone'];
-      const hex = opt?.type === 'select' ? opt.options.find((o) => o.value === cur)?.swatches?.[0] : undefined;
-      if (!hex) return;
-      const n = parseInt(hex.slice(1), 16);
-      const lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
-      document.body.classList.toggle('dark-ground', lum < 0.45);
-    };
-    this.params.onChange((k) => k === 'im.groundTone' && tone());
+    // text drawn over the canvas adapts to the brightness of the background
+    const tone = () => document.body.classList.toggle('dark-ground', !!this.movement.isDark?.(this.params.v));
+    this.params.onChange(() => tone());
     tone();
   }
 
@@ -201,8 +196,12 @@ class App implements AppApi {
   async playDemo() {
     await this.audio.start();
     this.audio.setVolume(this.params.num('src.volume'));
-    this.setTransport(new MidiFilePlayer(composeReverie(Math.floor(Math.random() * 1000)), this.audio, this.engine.bus, 'demo'));
+    this.setTransport(new MidiFilePlayer(this.composeDemo(Math.floor(Math.random() * 1000)), this.audio, this.engine.bus, 'demo'));
     this.transport!.play();
+  }
+
+  private composeDemo(seed: number) {
+    return (this.movement.demo ?? composeReverie)(seed);
   }
 
   private setTransport(t: Transport | null) {
@@ -253,7 +252,7 @@ class App implements AppApi {
   }
 
   private startDream() {
-    const p = new MidiFilePlayer(composeReverie(Math.floor(Math.random() * 1e6)), this.audio, this.engine.bus, 'demo');
+    const p = new MidiFilePlayer(this.composeDemo(Math.floor(Math.random() * 1e6)), this.audio, this.engine.bus, 'demo');
     p.loop = true;
     p.muted = !this.params.bool('src.idleSound');
     this.setTransport(p);
@@ -283,7 +282,7 @@ class App implements AppApi {
     if (!p) return;
     // a preset is a complete look: unspecified style parameters return to their defaults,
     // while installation preferences (touch, pointer light, weave density, atmosphere on/off) stay
-    const keep = new Set(['im.touch', 'im.touchPaint', 'im.pointerLight', 'im.atmosphere', 'im.groundDensity', 'im.touchRadius', 'im.touchStrength']);
+    const keep = new Set(this.movement.keepOnPreset ?? []);
     const values: ParamValues = {};
     for (const d of this.movement.params ?? []) if (!keep.has(d.key)) values[d.key] = d.default;
     this.params.applyPreset({ ...p, values: { ...values, ...p.values } }, 1.6);
@@ -337,35 +336,9 @@ class App implements AppApi {
   }
 
   randomise() {
-    const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-    const r = (a: number, b: number) => a + Math.random() * (b - a);
-    const opts = (k: string) => {
-      const d = this.params.def(k);
-      return d && d.type === 'select' ? d.options.map((o) => o.value) : [];
-    };
-    this.params.apply(
-      {
-        'im.palette': pick(opts('im.palette')),
-        'im.groundTone': pick(opts('im.groundTone')),
-        'im.ground': pick(['linen', 'linen', 'coarse', 'paper', 'gesso']),
-        'im.layout': pick(['horizon', 'horizon', 'focus', 'scatter', 'radial', 'pitchclass']),
-        'im.colorMode': pick(['register', 'register', 'pitchclass', 'harmony', 'height']),
-        'im.brush': pick(['auto', 'auto', 'filbert', 'flat', 'round', 'dab']),
-        'im.size': r(0.006, 0.02),
-        'im.speed': r(0.08, 0.38),
-        'im.curvature': r(0, 0.7),
-        'im.flowFollow': r(0.1, 0.8),
-        'im.horizontality': r(0.2, 0.9),
-        'im.brokenColor': r(0.3, 0.8),
-        'im.pickup': r(0.2, 0.7),
-        'im.impasto': r(0.4, 1.6),
-        'im.bristleContrast': r(0.4, 0.9),
-        'im.lightAz': r(60, 200),
-        'im.lightEl': r(18, 55),
-        'im.haze': r(0, 0.12),
-      },
-      2,
-    );
+    const v = this.movement.randomise?.(this.params.snapshot().values);
+    if (!v) return;
+    this.params.apply(v, 2);
     this.presetId = '';
     this.sidebar.refreshPresets();
     this.toast('A new variation');
@@ -498,6 +471,12 @@ class App implements AppApi {
         case 'KeyR': this.toggleRecord(); break;
         case 'KeyD': this.playDemo(); break;
         case 'KeyO': this.openFile(); break;
+        case 'KeyM': {
+          const live = MOVEMENTS.filter((m) => m.available);
+          const i = live.findIndex((m) => m.id === this.movement.id);
+          this.setMovement(live[(i + 1) % live.length].id);
+          break;
+        }
         case 'BracketLeft': this.stepPreset(-1); break;
         case 'BracketRight': this.stepPreset(1); break;
         case 'KeyC': {
