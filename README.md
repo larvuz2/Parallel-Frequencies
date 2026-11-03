@@ -27,7 +27,14 @@ Live movements:
   into smoke, and luminous trails come from temporal feedback. *Les Noirs* draws charcoal particles
   on paper instead.
 
-Switch movements with the title dropdown, `M`, or `?movement=symbolism` / `baroque` /
+- **Vitrine — custom, living matter.** A walnut vitrine on a black stage holds a mass of dark,
+  combed, crumpled matter veined with coral, lavender and cyan light. It starts empty and
+  accumulates with the music: every note releases matter where it lands, the surface swells and
+  glows under the notes, and in silence it slowly dissolves. It is a hybrid of a folded implicit
+  surface (a dense mesh shaded with fibrous strands along the folds and luminous crest veins) and a
+  GPU particle simulation that combs fibres over the surface and breathes smoke from its edges.
+
+Switch movements with the title dropdown, `M`, or `?movement=vitrine` / `symbolism` / `baroque` /
 `neoplasticism` in the URL.
 
 ---
@@ -203,6 +210,7 @@ src/
     neoplasticism/     De Stijl: lattice world, camera director, depth of field, Mozart demo
     baroque/           raymarched SDF chapel, voice-lights, trails, Bach demo
     symbolism/         GPGPU particle visions, Scriabin colour keyboard, trails, Scriabin demo
+    vitrine/           walnut vitrine, folded matter mesh + surface-combed GPU particles, growth
   ui/                  schema-driven sidebar, dropdowns, transport bar, recorder
 ```
 
