@@ -289,7 +289,7 @@ void main() {
   float rr = fract(region + snoiseless(pos.xyz));
   vec3 vein = rr < 0.45 ? uVeinA : rr < 0.75 ? uVeinB : uVeinC;
   float crestLine = smoothstep(0.9, 0.995, crest) * (0.5 + 0.5 * sin(uTime * 0.4 + region * 20.0));
-  vec3 emis = vein * crestLine * uCrestGlow * 0.15 + glow * 0.5;
+  vec3 emis = vein * crestLine * uCrestGlow * 0.15 + glow * 0.22;
 
   float alpha = uOpacity * (wisp ? 0.06 : 0.7);
   if (wisp) alpha *= 0.15 + 0.85 * smoothstep(0.35, 1.2, length(pos.xyz) - 1.0);
@@ -299,7 +299,7 @@ void main() {
   // particles fade in as they are born and out as the cloud dissolves
   float rank = hq(ref * 733.1 + 0.37);
   alpha *= smoothstep(uSpawned, uSpawned - 0.015, rank);
-  if (wisp) body = mix(vec3(0.16, 0.17, 0.19), mix(uVeinC, uVeinB, c) * 0.4, 0.35) + uVeinA * step(0.9, c) * 0.15;
+  if (wisp) body = mix(vec3(0.15, 0.16, 0.18), mix(uVeinC, uVeinB, c) * 0.35, 0.18);
   vCol = body * alpha + emis * alpha * 1.5;
   vA = alpha;
 }

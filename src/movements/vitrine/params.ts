@@ -43,12 +43,12 @@ export const VITRINE_PARAMS: ParamDef[] = [
   /* growth */
   { key: 'vt.accumulate', label: 'Grow with the music', group: 'growth', type: 'toggle', default: true, hint: 'Off: the whole mass is there from the start.' },
   { key: 'vt.startFill', label: 'Starting amount', group: 'growth', type: 'range', min: 0, max: 1, step: 0.005, default: 0.03, format: pct },
-  { key: 'vt.perNote', label: 'Matter per note', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0016, format: (v) => `${(v * 100).toFixed(2)}%`, hint: 'How much of the mass each note releases (louder notes release more).' },
+  { key: 'vt.perNote', label: 'Matter per note', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0006, format: (v) => `${(v * 100).toFixed(2)}%`, hint: 'How much of the mass each note releases (louder notes release more).' },
   { key: 'vt.scatter', label: 'Scatter', group: 'growth', type: 'range', min: 0, max: 1, step: 0.01, default: 0.35, format: pct, hint: 'Share of new matter that appears anywhere on the form, rather than where the note lands.' },
   { key: 'vt.idleGrowth', label: 'Slow growth', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0005, default: 0.001, format: (v) => `${(v * 100).toFixed(2)}%/s` },
   { key: 'vt.dissolve', label: 'Dissolve in silence', group: 'growth', type: 'toggle', default: true },
   { key: 'vt.silentAfter', label: 'Silence before dissolving', group: 'growth', type: 'range', min: 5, max: 300, step: 1, default: 45, format: sec },
-  { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0016, format: (v) => `${(v * 100).toFixed(2)}%/s` },
+  { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0006, format: (v) => `${(v * 100).toFixed(2)}%/s` },
 
   /* form */
   { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.4, format: x2 },
