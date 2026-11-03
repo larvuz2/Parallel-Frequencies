@@ -205,12 +205,12 @@ void main() {
       vec3 d = pos.xyz - uSrcPos[i].xyz;
       float r = uSrcForce[i].z * 1.3;
       float fall = exp(-dot(d, d) / (r * r));
-      g.rgb += uSrcCol[i].rgb * uSrcCol[i].a * fall * uDt * 6.0;
+      g.rgb += uSrcCol[i].rgb * uSrcCol[i].a * fall * uDt * 3.0;
     }
   } else {
     g = vec4(0.0);
   }
-  g.rgb = min(g.rgb, vec3(4.0));
+  g.rgb = min(g.rgb, vec3(1.2));
   gl_FragColor = g;
 }
 `;

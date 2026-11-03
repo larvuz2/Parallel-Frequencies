@@ -391,7 +391,7 @@ export class VitrineWorld implements MovementInstance {
     vu.uFlow.value = p.num('vt.flow') * modScale(g, 'flow', 0);
     vu.uFlowScale.value = p.num('vt.flowScale');
     vu.uDamping.value = p.num('vt.damping');
-    vu.uWisps.value = clamp(p.num('vt.wisps') * modScale(g, 'wisps', 0), 0, 0.9);
+    vu.uWisps.value = clamp(p.num('vt.wisps') * modScale(g, 'wisps', 0), 0, 0.45);
     vu.uNumSrc.value = live.length;
     const pu = this.posVar.material.uniforms;
     pu.uDt.value = sdt;

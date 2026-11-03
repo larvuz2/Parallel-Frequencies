@@ -140,7 +140,7 @@ export function createMatter(detail = 110) {
           float r = uSrcForce[i].z * 1.4;
           float fall = exp(-dot(dd, dd) / (r * r));
           float line = smoothstep(0.8, 0.98, cr) + smoothstep(0.6, 0.0, valley) * 0.4;
-          emis += uSrcCol[i].rgb * uSrcCol[i].a * fall * (0.2 + line) * (0.25 + bundle);
+          emis += uSrcCol[i].rgb * uSrcCol[i].a * fall * (0.05 + line) * (0.15 + bundle) * 0.6;
         }
         // a glowing rim where the matter is still growing
         if (edge < 0.25) emis += vein * (1.0 - edge / 0.25) * 0.35;

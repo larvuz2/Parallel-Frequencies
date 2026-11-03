@@ -43,12 +43,12 @@ export const VITRINE_PARAMS: ParamDef[] = [
   /* growth */
   { key: 'vt.accumulate', label: 'Grow with the music', group: 'growth', type: 'toggle', default: true, hint: 'Off: the whole mass is there from the start.' },
   { key: 'vt.startFill', label: 'Starting amount', group: 'growth', type: 'range', min: 0, max: 1, step: 0.005, default: 0.03, format: pct },
-  { key: 'vt.perNote', label: 'Matter per note', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0005, default: 0.008, format: (v) => `${(v * 100).toFixed(2)}%`, hint: 'How much of the mass each note releases (louder notes release more).' },
+  { key: 'vt.perNote', label: 'Matter per note', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0016, format: (v) => `${(v * 100).toFixed(2)}%`, hint: 'How much of the mass each note releases (louder notes release more).' },
   { key: 'vt.scatter', label: 'Scatter', group: 'growth', type: 'range', min: 0, max: 1, step: 0.01, default: 0.35, format: pct, hint: 'Share of new matter that appears anywhere on the form, rather than where the note lands.' },
   { key: 'vt.idleGrowth', label: 'Slow growth', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0005, default: 0.001, format: (v) => `${(v * 100).toFixed(2)}%/s` },
   { key: 'vt.dissolve', label: 'Dissolve in silence', group: 'growth', type: 'toggle', default: true },
   { key: 'vt.silentAfter', label: 'Silence before dissolving', group: 'growth', type: 'range', min: 5, max: 300, step: 1, default: 45, format: sec },
-  { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0005, default: 0.008, format: (v) => `${(v * 100).toFixed(2)}%/s` },
+  { key: 'vt.dissolveRate', label: 'Dissolve speed', group: 'growth', type: 'range', min: 0, max: 0.05, step: 0.0001, default: 0.0016, format: (v) => `${(v * 100).toFixed(2)}%/s` },
 
   /* form */
   { key: 'vt.radius', label: 'Size', group: 'form', type: 'range', min: 0.5, max: 1.8, step: 0.01, default: 1.4, format: x2 },
@@ -98,10 +98,10 @@ export const VITRINE_PARAMS: ParamDef[] = [
   /* glow */
   { key: 'vt.palette', label: 'Vein colours', group: 'glow', type: 'select', default: 'reference', options: VEIN_PALETTES.map((p) => ({ value: p.id, label: p.label, swatches: [p.a, p.b, p.c] })) },
   { key: 'vt.crestGlow', label: 'Fold glow', group: 'glow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.75, format: x2, hint: 'Light that always runs along the fold crests.' },
-  { key: 'vt.noteGlow', label: 'Note glow', group: 'glow', type: 'range', min: 0, max: 4, step: 0.01, default: 1.3, format: x2, hint: 'Light that notes kindle where they land (bass coral, middle lavender, treble cyan).' },
+  { key: 'vt.noteGlow', label: 'Note glow', group: 'glow', type: 'range', min: 0, max: 4, step: 0.01, default: 0.45, format: x2, hint: 'Light that notes kindle where they land (bass coral, middle lavender, treble cyan).' },
   { key: 'vt.glowRadius', label: 'Note reach', group: 'glow', type: 'range', min: 0.1, max: 1.5, step: 0.01, default: 0.5, format: x2 },
-  { key: 'vt.glowDecay', label: 'Glow afterlife', group: 'glow', type: 'range', min: 0.2, max: 10, step: 0.05, default: 2.5, format: sec },
-  { key: 'vt.swell', label: 'Swell', group: 'glow', type: 'range', min: 0, max: 3, step: 0.01, default: 1, format: x2, hint: 'Notes push the surface outward where they land.' },
+  { key: 'vt.glowDecay', label: 'Glow afterlife', group: 'glow', type: 'range', min: 0.2, max: 10, step: 0.05, default: 1.8, format: sec },
+  { key: 'vt.swell', label: 'Swell', group: 'glow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.35, format: x2, hint: 'Notes push the surface outward where they land.' },
 ];
 
 export const VITRINE_TARGETS: ModTarget[] = [
@@ -121,9 +121,9 @@ export const VITRINE_ROUTES: ModRoute[] = [
   { source: 'velocity', target: 'glow', amount: 0.5 },
   { source: 'velocity', target: 'swell', amount: 0.5 },
   { source: 'velocity', target: 'growth', amount: 0.5 },
-  { source: 'loudness', target: 'folds', amount: 0.35 },
+  { source: 'loudness', target: 'folds', amount: 0.2 },
   { source: 'density', target: 'flow', amount: 0.6 },
-  { source: 'tension', target: 'wisps', amount: 0.8 },
-  { source: 'tension', target: 'evolve', amount: 1.2 },
+  { source: 'tension', target: 'wisps', amount: 0.35 },
+  { source: 'tension', target: 'evolve', amount: 0.8 },
   { source: 'loudness', target: 'light', amount: 0.25 },
 ];
