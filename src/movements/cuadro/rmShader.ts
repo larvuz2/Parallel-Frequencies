@@ -82,6 +82,7 @@ uniform float uCoreR;
 uniform float uGrowth;
 uniform float uSwell;
 uniform float uTwist;
+uniform float uFray;
 
 // look
 uniform vec3 uOuter; uniform vec3 uInner; uniform vec3 uGlowCol; uniform vec3 uRimCol; uniform vec3 uSpeckCol; uniform vec3 uDustCol;
@@ -135,7 +136,7 @@ vec3 map(vec3 p) {
   float nl = n * uLayers;
   float sheet = abs(nl - floor(nl + 0.5)) / uLayers;
   // sheets thin out toward the envelope, so the mass frays into its surroundings instead of ending in a cut
-  float inside = smoothstep(0.0, 0.55, -env);
+  float inside = smoothstep(0.0, uFray, -env);
   float th = uSheetTh * (1.0 + uSwell * noteSwell(p)) * inside;
   float sd = (sheet - th) / (uSheetFreq * 1.9) ;
   // sheets fade out (thin away) toward the envelope, so the mass has a soft, frayed boundary

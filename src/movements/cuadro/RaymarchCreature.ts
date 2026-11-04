@@ -61,7 +61,7 @@ export class RaymarchCreature implements MovementInstance {
       uCamPos: { value: new THREE.Vector3() }, uSteps: { value: 96 },
       uLobeA: { value: new THREE.Vector3() }, uLobeB: { value: new THREE.Vector3() }, uRadA: { value: 1 }, uRadB: { value: 1 }, uBridge: { value: 0.6 },
       uEnvNoise: { value: 0.3 }, uSheetFreq: { value: 1 }, uSheetTh: { value: 0.1 }, uWarp: { value: 1 }, uEvolve: { value: 0.03 }, uLayers: { value: 1 },
-      uCoreR: { value: 0.6 }, uGrowth: { value: 1 }, uSwell: { value: 0.5 }, uTwist: { value: 0 },
+      uCoreR: { value: 0.6 }, uGrowth: { value: 1 }, uSwell: { value: 0.5 }, uTwist: { value: 0 }, uFray: { value: 0.2 },
       uOuter: { value: c() }, uInner: { value: c() }, uGlowCol: { value: c() }, uRimCol: { value: c() }, uSpeckCol: { value: c() }, uDustCol: { value: c() },
       uDepthMix: { value: 1.5 }, uKeyDir: { value: new THREE.Vector3(-0.5, 0.7, 0.6) }, uKeyCol: { value: new THREE.Color(1, 1, 1) },
       uKey: { value: 1 }, uAmbient: { value: 0.15 }, uRim: { value: 0.8 }, uTrans: { value: 0.5 }, uGloss: { value: 0.4 }, uGrain: { value: 0.6 },
@@ -293,6 +293,7 @@ export class RaymarchCreature implements MovementInstance {
     u.uGrowth.value = this.growth;
     u.uSwell.value = p.num('cu.rmSwell') * modScale(g, 'swell', 0);
     u.uTwist.value = p.num('cu.rmTwist');
+    u.uFray.value = p.num('cu.rmFray');
     u.uOuter.value.set(p.str('cu.rmOuter'));
     u.uInner.value.set(p.str('cu.rmInner'));
     u.uGlowCol.value.set(p.str('cu.rmGlowColor'));
