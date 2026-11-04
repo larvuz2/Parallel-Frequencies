@@ -16,16 +16,16 @@ const PRESETS: Preset[] = [
     values: {
       'cu.palette': 'rosegarden', 'cu.veinA': '#e9906f', 'cu.veinB': '#e8a0a8', 'cu.veinC': '#f6c8b8',
       // two-tone velvet: emerald billows around a glowing dusty-rose heart
-      'cu.matterColor': '#3c8f72', 'cu.albedo': 0.3, 'cu.coreColor': '#f4a8ae', 'cu.coreMix': 1, 'cu.coreSize': 0.8, 'cu.coreGlow': 2.6,
-      'cu.velvet': 1, 'cu.velvetSheen': 0.9, 'cu.velvetGloss': 0.3, 'cu.softEdge': 0.75, 'cu.grainAmt': 0.8,
+      'cu.matterColor': '#3c8f72', 'cu.albedo': 0.3, 'cu.coreColor': '#e8909a', 'cu.coreMix': 1, 'cu.coreSize': 0.8, 'cu.coreGlow': 1.5,
+      'cu.velvet': 1, 'cu.velvetSheen': 0.9, 'cu.velvetGloss': 0.45, 'cu.softEdge': 0.75, 'cu.grainAmt': 0.8,
       'cu.rimColor': '#8fe0c0', 'cu.rim': 1.2, 'cu.keyColor': '#fff0ea', 'cu.key': 0.95,
       'cu.patch': 0.2, 'cu.patchScale': 3, 'cu.patchCover': 0.45, 'cu.cells': 0, 'cu.veinShare': 0, 'cu.crestGlow': 0,
       // fine rose threads in parallel bundles across the gaps
-      'cu.webs': 264, 'cu.webBundle': 12, 'cu.webSpread': 0.35, 'cu.webOpacity': 0.28, 'cu.webColor': '#f6c0b8',
+      'cu.webs': 264, 'cu.webBundle': 12, 'cu.webSpread': 0.35, 'cu.webOpacity': 0.5, 'cu.webColor': '#f6c0b8',
       'cu.smokeColor': '#2a5a48', 'cu.smokeTint': 0.1, 'cu.smokeStrands': 0.14, 'cu.smokeOpacity': 0.18, 'cu.dotOpacity': 0.06,
       // big soft billows of folded cloth
       'cu.bend': 0.1, 'cu.width': 1.6, 'cu.height': 0.95, 'cu.depth': 0.9, 'cu.radius': 1.0, 'cu.lobes': 0.5, 'cu.lobeScale': 1.1, 'cu.roundness': 0.3,
-      'cu.folds': 0.5, 'cu.foldScale': 0.7, 'cu.warp': 0.9,
+      'cu.folds': 0.5, 'cu.foldScale': 1.15, 'cu.warp': 1.1,
       'cu.wallColor': '#33373d', 'cu.lightColor': '#e6ecf2',
     },
   },
