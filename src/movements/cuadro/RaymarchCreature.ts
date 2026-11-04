@@ -189,7 +189,9 @@ export class RaymarchCreature implements MovementInstance {
       const up = dir.clone().cross(side).normalize();
       const bow = (rnd() - 0.5) * 2 * bowAmt;
       for (let k = 0; k < per; k++) {
-        const off = (rnd() - 0.5) * spread * len * 0.5;
+        // each thread has its own anchor on each side: they run side by side instead of meeting in a point
+        const offA = (rnd() - 0.5) * spread * len * 0.5;
+        const offB = offA + (rnd() - 0.5) * spread * len * 0.2;
         const lift = (rnd() - 0.5) * spread * len * 0.15;
         const phase = rnd();
         let prev: THREE.Vector3 | null = null;
@@ -198,7 +200,7 @@ export class RaymarchCreature implements MovementInstance {
           const sn = Math.sin(Math.PI * t);
           const q = A.clone().lerp(B, t)
             .addScaledVector(up, (bow + lift) * len * 0.25 * sn)
-            .addScaledVector(side, off * (0.6 + 0.4 * sn));
+            .addScaledVector(side, offA + (offB - offA) * t);
           if (prev) {
             pos.push(prev.x, prev.y, prev.z, q.x, q.y, q.z);
             sd.push(phase, b, (s - 1) / THREAD_SEG, 0, phase, b, t, 0);
