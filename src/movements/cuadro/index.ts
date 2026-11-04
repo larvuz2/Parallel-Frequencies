@@ -13,10 +13,10 @@ const PRESETS: Preset[] = [
       // near-black navy velvet; the light lives in pale-blue rims and amber glitter
       'cu.rmOuter': '#141c44', 'cu.rmInner': '#1c2758', 'cu.rmDepthMix': 0.8, 'cu.rmGlowColor': '#ff8a3a', 'cu.rmNoteColor': '#ffb070',
       'cu.rmRimColor': '#8aa4ff', 'cu.rmSpeckColor': '#ff9a3c', 'cu.rmDustColor': '#6a80c8', 'cu.rmLightColor': '#c8d6ff',
-      'cu.rmKey': 0.6, 'cu.rmAmbient': 0.06, 'cu.rmRim': 1.6, 'cu.rmTranslucency': 0.35, 'cu.rmGloss': 0.3, 'cu.rmGlow': 0.6,
+      'cu.rmKey': 0.5, 'cu.rmAmbient': 0.05, 'cu.rmRim': 1.05, 'cu.rmTranslucency': 0.35, 'cu.rmGloss': 0.3, 'cu.rmGlow': 0.6,
       'cu.rmSpeck': 1.6, 'cu.rmDust': 0.1, 'cu.rmHaze': 0.2,
       'cu.rmSeparation': 1.6, 'cu.rmBridge': 0.8, 'cu.rmFray': 0.25, 'cu.rmLumpy': 0.6, 'cu.rmFoldScale': 0.8, 'cu.rmTwist': 0.35,
-      'cu.rmCore': 0.2, 'cu.rmThickness': 0.22, 'cu.rmFrame': 1.25,
+      'cu.rmCore': 0.2, 'cu.rmThickness': 0.22, 'cu.rmFrame': 1.42,
       'cu.rmThreadBundles': 4, 'cu.rmThreadOpacity': 0.18, 'cu.rmThreadColor': '#c8d4ff',
     },
   },
