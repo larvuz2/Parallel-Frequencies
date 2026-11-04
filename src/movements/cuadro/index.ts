@@ -15,7 +15,7 @@ const PRESETS: Preset[] = [
     description: 'Emerald velvet folds around a glowing dusty-rose heart; rose silk threads and copper specks.',
     values: {
       'cu.engine': 'raymarch',
-      'cu.rmOuter': '#1d4d3c', 'cu.rmInner': '#b86c78', 'cu.rmDepthMix': 0.9, 'cu.rmCore': 0.32, 'cu.rmFray': 0.18, 'cu.rmBridge': 0.75, 'cu.rmFoldScale': 0.75, 'cu.rmFrame': 1.18, 'cu.rmLumpy': 0.6, 'cu.rmDust': 0.2, 'cu.rmKey': 0.75, 'cu.rmThickness': 0.2, 'cu.rmGlowColor': '#ff9a8a', 'cu.rmNoteColor': '#ffb8a0',
+      'cu.rmOuter': '#1d4d3c', 'cu.rmInner': '#b86c78', 'cu.rmDepthMix': 0.9, 'cu.rmCore': 0.32, 'cu.rmFray': 0.18, 'cu.rmBridge': 0.75, 'cu.rmFoldScale': 0.75, 'cu.rmFrame': 1.18, 'cu.rmLumpy': 0.6, 'cu.rmDust': 0.08, 'cu.rmHaze': 0.25, 'cu.rmKey': 0.75, 'cu.rmThickness': 0.2, 'cu.rmGlowColor': '#ff9a8a', 'cu.rmNoteColor': '#ffb8a0',
       'cu.rmRimColor': '#4f9c80', 'cu.rmSpeckColor': '#e08a5a', 'cu.rmDustColor': '#2f6b55', 'cu.rmLightColor': '#fff0ea',
       'cu.rmThreadColor': '#f2b8b0', 'cu.rmThreadsPer': 24, 'cu.rmThreadBundles': 6, 'cu.rmThreadOpacity': 0.25,
       'cu.rmSpeck': 0.35, 'cu.rmGlow': 1.4, 'cu.rmTranslucency': 0.7, 'cu.rmSeparation': 2.1, 'cu.rmBalance': 0.25, 'cu.rmTilt': 0.2,
