@@ -19,7 +19,7 @@ export function createMatter(detail = 110) {
       uStretch: { value: new THREE.Vector3(1.22, 1, 1) }, uFlowScale: { value: 1.5 },
       uKeyDir: { value: new THREE.Vector3(-0.4, 0.7, 0.5).normalize() }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uRim: { value: 0.6 },
       uAlbedo: { value: 0.2 }, uSheen: { value: 0.5 }, uCrestGlow: { value: 0.9 },
-      uTint: { value: new THREE.Color(1, 1, 1) }, uPatch: { value: 0 }, uPatchScale: { value: 1.2 }, uPatchCover: { value: 0.2 }, uCells: { value: 0 }, uCellScale: { value: 6 }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
+      uTint: { value: new THREE.Color(1, 1, 1) }, uCoreCol: { value: new THREE.Color(1, 0.7, 0.7) }, uCoreExtent: { value: new THREE.Vector3(1, 1, 1) }, uCoreMix: { value: 0 }, uCoreSize: { value: 0.7 }, uCoreGlow: { value: 0 }, uPatch: { value: 0 }, uPatchScale: { value: 1.2 }, uPatchCover: { value: 0.2 }, uCells: { value: 0 }, uCellScale: { value: 6 }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
       uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
       uGrowth: { value: 1 }, uStreak: { value: 1 }, uStripes: { value: 40 },
       uNumSrc: { value: 0 }, uSrcPos: { value: [] as THREE.Vector4[] }, uSrcForce: { value: [] as THREE.Vector4[] }, uSrcCol: { value: [] as THREE.Vector4[] },
@@ -71,7 +71,14 @@ export function createMatter(detail = 110) {
       ${FIELD}
       uniform vec3 uKeyDir;
       uniform float uKey, uAmbient, uRim, uAlbedo, uSheen, uCrestGlow, uGrowth, uStreak, uStripes;
-      uniform vec3 uTint, uKeyCol, uRimCol;
+      uniform vec3 uTint, uKeyCol, uRimCol, uCoreCol, uCoreExtent;
+      uniform float uCoreMix, uCoreSize, uCoreGlow;
+      vec3 coreTint(vec3 p, vec3 outer) {
+        float c = 1.0 - smoothstep(uCoreSize - 0.3, uCoreSize + 0.25, length(p / uCoreExtent));
+        return mix(outer, uCoreCol, c * uCoreMix);
+      }
+      float coreAmt(vec3 p) { return (1.0 - smoothstep(uCoreSize - 0.3, uCoreSize + 0.25, length(p / uCoreExtent))) * uCoreMix; }
+
       uniform vec3 uVeinA, uVeinB, uVeinC;
       uniform int uNumSrc;
       uniform vec4 uSrcPos[${MAX_SOURCES}];
@@ -145,7 +152,8 @@ export function createMatter(detail = 110) {
         float ao = mix(0.22, 1.0, valley);
         float tube = 0.5 + 0.5 * sin(hf * 6.2831853);
         float albedo = uAlbedo * mix(0.55, 1.12, pow(tube, 0.7) * aa + (1.0 - aa) * 0.6);
-        vec3 col = uTint * albedo * (uAmbient + diff * uKey * uKeyCol) * ao;
+        vec3 col = coreTint(vP, uTint) * albedo * (uAmbient + diff * uKey * uKeyCol) * ao;
+        col += uCoreCol * coreAmt(vP) * uCoreGlow * 0.12 * (0.4 + 0.6 * valley);
         col += vec3(0.9, 0.92, 1.0) * sheen * uKey * 0.06 * ao;
         col += uRimCol * rim * 0.05;
 

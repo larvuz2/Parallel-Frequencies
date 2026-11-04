@@ -564,6 +564,16 @@ export class VitrineWorld implements MovementInstance {
     mu.uRim.value = p.num(this.k('rim'));
     mu.uAlbedo.value = p.num(this.k('albedo'));
     mu.uTint.value.copy(tint);
+    const coreSet = (u: Record<string, THREE.IUniform>) => {
+      u.uCoreCol.value.set(p.str(this.k('coreColor')));
+      u.uCoreMix.value = p.num(this.k('coreMix'));
+      u.uCoreSize.value = p.num(this.k('coreSize'));
+      u.uCoreGlow.value = p.num(this.k('coreGlow'));
+      u.uCoreExtent.value.set(p.num(this.k('width')), p.num(this.k('height')), p.num(this.k('depth'))).multiplyScalar(p.num(this.k('radius')) * 1.3);
+    };
+    coreSet(mu);
+    coreSet(this.strands.material.uniforms);
+
     mu.uPatch.value = p.num(this.k('patch'));
     mu.uPatchScale.value = p.num(this.k('patchScale'));
     mu.uPatchCover.value = p.num(this.k('patchCover'));

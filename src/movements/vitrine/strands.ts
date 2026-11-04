@@ -211,6 +211,17 @@ uniform float uVeinShare;
 uniform float uWispAlpha;
 uniform float uTime;
 uniform vec3 uTint;
+uniform vec3 uCoreCol;
+uniform vec3 uCoreExtent;
+uniform float uCoreMix;
+uniform float uCoreSize;
+uniform float uCoreGlow;
+vec3 coreTint(vec3 p, vec3 outer) {
+  float c = 1.0 - smoothstep(uCoreSize - 0.3, uCoreSize + 0.25, length(p / uCoreExtent));
+  return mix(outer, uCoreCol, c * uCoreMix);
+}
+float coreAmt(vec3 p) { return (1.0 - smoothstep(uCoreSize - 0.3, uCoreSize + 0.25, length(p / uCoreExtent))) * uCoreMix; }
+
 uniform vec3 uKeyCol;
 uniform vec3 uRimCol;
 uniform vec3 uSmokeCol;
@@ -260,7 +271,8 @@ void main() {
   float valley = smoothstep(-0.55, 0.45, vValley);
   float ao = mix(0.22, 1.0, valley);
   float tone = uAlbedo * 0.85 * (1.0 - uToneVar * 0.5 + uToneVar * hh(vec2(vSeed * 0.11, 2.0)));
-  vec3 col = uTint * tone * (uAmbient + diff * uKey * uKeyCol) * ao * (0.62 + 0.38 * tube);
+  vec3 col = coreTint(vP, uTint) * tone * (uAmbient + diff * uKey * uKeyCol) * ao * (0.62 + 0.38 * tube);
+  col += uCoreCol * coreAmt(vP) * uCoreGlow * 0.1 * tube;
   col += vec3(0.92, 0.95, 1.0) * spec * uKey * 0.3 * ao * tube;
   col += uRimCol * rim * 0.06 * tube;
 
@@ -337,7 +349,7 @@ export class Strands {
       uniforms: {
         tPos: { value: null }, tNrm: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uWidth: { value: 2 }, uGrowth: { value: 1 },
         uLayer: { value: 0.03 }, uMaxSeg: { value: 0.15 }, uWispShare: { value: 0.1 }, uWispAlpha: { value: 0.3 },
-        uTint: { value: new THREE.Color(1, 1, 1) }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
+        uTint: { value: new THREE.Color(1, 1, 1) }, uCoreCol: { value: new THREE.Color(1, 0.7, 0.7) }, uCoreExtent: { value: new THREE.Vector3(1, 1, 1) }, uCoreMix: { value: 0 }, uCoreSize: { value: 0.7 }, uCoreGlow: { value: 0 }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
         uSmokeCol: { value: new THREE.Color(0.2, 0.21, 0.23) }, uSmokeTint: { value: 0.5 }, uWarmShare: { value: 0.15 }, uFrontFade: { value: 0.85 },
         uVeinLo: { value: 0.86 }, uVeinHi: { value: 0.98 }, uPulse: { value: 0.4 }, uToneVar: { value: 0.4 }, uSmokeBright: { value: 1 }, uSmokeWidth: { value: 1 }, uCells: { value: 0 }, uPatch: { value: 0 }, uPatchScale: { value: 1.2 }, uPatchCover: { value: 0.2 }, uKeyDir: { value: new THREE.Vector3(0, 1, 0) }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uAlbedo: { value: 0.2 },
         uGloss: { value: 40 }, uSheen: { value: 0.4 }, uRim: { value: 0.6 }, uCrestGlow: { value: 1 }, uVeinShare: { value: 0.12 }, uTime: { value: 0 },

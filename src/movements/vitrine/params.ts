@@ -151,6 +151,10 @@ const NEW_PARAMS: ParamDef[] = [
 
   /* strands */
   { key: 'vt.matterColor', label: 'Matter colour', group: 'strands', type: 'color', default: '#ffffff', hint: 'Tints the strands and body. White keeps the neutral grey.' },
+  { key: 'vt.coreColor', label: 'Core colour', group: 'strands', type: 'color', default: '#e8a0a0', hint: 'A second colour that fills the heart of the mass, blending out to the Matter colour at the edges.' },
+  { key: 'vt.coreMix', label: 'Core amount', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0, format: pct, hint: '0 = one colour only.' },
+  { key: 'vt.coreSize', label: 'Core size', group: 'strands', type: 'range', min: 0.1, max: 1.5, step: 0.01, default: 0.7, format: x2, hint: 'How far the core colour reaches toward the outer folds.' },
+  { key: 'vt.coreGlow', label: 'Core glow', group: 'strands', type: 'range', min: 0, max: 3, step: 0.01, default: 0, format: x2, hint: 'The core glows softly from within.' },
   { key: 'vt.toneVar', label: 'Tone variation', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0.4, format: pct, hint: 'How much individual strands differ in brightness.' },
 
   /* smoke */
@@ -240,7 +244,7 @@ const GROUP_OF: Record<string, string> = {
 const ORDER = [
   'vt.camera', 'vt.zoom', 'vt.camHeight', 'vt.fov', 'vt.camSpeed', 'vt.sway',
   'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.bend', 'vt.bendFreq', 'vt.folds', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
-  'vt.strands', 'vt.matterColor', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
+  'vt.strands', 'vt.matterColor', 'vt.coreColor', 'vt.coreMix', 'vt.coreSize', 'vt.coreGlow', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
   'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade', 'vt.webs', 'vt.webOpacity', 'vt.webColor',
   'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.patch', 'vt.patchScale', 'vt.patchCover', 'vt.cells', 'vt.cellScale', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',
   'vt.key', 'vt.keyColor', 'vt.keyAz', 'vt.keyEl', 'vt.ambient', 'vt.rim', 'vt.rimColor', 'vt.sheen', 'vt.gloss',

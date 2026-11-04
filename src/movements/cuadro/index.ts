@@ -11,6 +11,20 @@ const PRESETS: Preset[] = [
     values: { 'cu.palette': 'nocturne', 'cu.veinA': '#ff9a3c', 'cu.veinB': '#7aa0ff', 'cu.veinC': '#9fb8ff', 'cu.matterColor': '#3f55b0' },
   },
   {
+    id: 'rosegarden', label: 'Rose & emerald',
+    description: 'Emerald velvet folds around a glowing dusty-rose heart, rose silk threads and copper specks.',
+    values: {
+      'cu.palette': 'rosegarden', 'cu.veinA': '#f2a487', 'cu.veinB': '#e8a0a8', 'cu.veinC': '#f6c8b8',
+      'cu.matterColor': '#4fa585', 'cu.coreColor': '#f0a6a8', 'cu.coreMix': 0.95, 'cu.coreSize': 0.75, 'cu.coreGlow': 1.4,
+      'cu.albedo': 0.3, 'cu.rimColor': '#7fd0b0', 'cu.rim': 1.3, 'cu.keyColor': '#f2e6e0',
+      'cu.patch': 0.5, 'cu.patchScale': 2.4, 'cu.patchCover': 0.3, 'cu.cells': 0, 'cu.veinShare': 0.04, 'cu.crestGlow': 0.5,
+      'cu.webs': 110, 'cu.webOpacity': 0.35, 'cu.webColor': '#f2b0a8',
+      'cu.smokeColor': '#1f3a30', 'cu.smokeTint': 0.2, 'cu.smokeStrands': 0.14, 'cu.smokeOpacity': 0.2, 'cu.dotOpacity': 0.18,
+      'cu.bend': 0.15, 'cu.width': 1.9, 'cu.height': 0.85, 'cu.lobes': 1.1, 'cu.radius': 0.92,
+      'cu.wallColor': '#33373d', 'cu.lightColor': '#e6ecf2',
+    },
+  },
+  {
     id: 'ember', label: 'Ember tide',
     description: 'Darker body, the amber spreads; warm room light.',
     values: { 'cu.palette': 'ember', 'cu.veinA': '#ff4a2a', 'cu.veinB': '#ff8f3a', 'cu.veinC': '#ffd27a', 'cu.matterColor': '#3a3f5c', 'cu.patch': 2.4, 'cu.patchCover': -0.1, 'cu.lightColor': '#ffe2c4', 'cu.frameWood': 'wenge' },
