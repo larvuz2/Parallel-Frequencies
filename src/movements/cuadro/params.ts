@@ -11,15 +11,18 @@ const LOOK: Record<string, ParamValue> = {
   radius: 0.9, width: 2.05, height: 0.72, depth: 0.85, lobes: 0.95, lobeScale: 1.45, folds: 0.3, foldScale: 0.8, warp: 0.6,
   bend: 0.24, bendFreq: 1.7, breathe: 1, evolve: 0.02,
   // strands: short and fine, so the skin reads as a grainy, sparkling surface
-  strands: '65536', matterColor: '#3f55b0', albedo: 0.26, toneVar: 0.7, strandWidth: 1.7, strandLength: 0.1, contour: 0.3, sweep: 1.4, thickness: 0.18,
+  strands: '65536', matterColor: '#33479f', albedo: 0.5, toneVar: 0.7, strandWidth: 1.7, strandLength: 0.1, contour: 0.3, sweep: 1.4, thickness: 0.18,
+  // the reference is a smooth velvety skin, not combed fibres
+  skinStrands: false, velvet: 1, velvetSheen: 1.1, velvetGloss: 0.55, softEdge: 0.7, grainAmt: 0.7, streaks: 0, body: true, fibreOpacity: 0,
+  webBundle: 12, webSpread: 0.3,
   // smoke & dust
   smokeStrands: 0.12, smokeOpacity: 0.16, smokeColor: '#28324c', smokeTint: 0.3, warmShare: 0.06, smokeLength: 1.5, smokeWidth: 0.7, frontFade: 0.9,
   dotOpacity: 0.14, dotSize: 0.7, wisps: 0.25, wispReach: 0.5,
-  webs: 60, webOpacity: 0.22, webColor: '#b8c8ff',
+  webs: 180, webOpacity: 0.22, webColor: '#b8c8ff',
   // light & colour
   palette: 'nocturne', veinA: '#ff9a3c', veinB: '#7aa0ff', veinC: '#9fb8ff', veinShare: 0.025, crestGlow: 0.35, veinThreshold: 0.9,
   patch: 0.8, patchScale: 2.1, patchCover: 0.25, cells: 0.55, cellScale: 9,
-  key: 1.1, keyColor: '#c4d4ff', rim: 1.9, rimColor: '#b4c6ff', ambient: 0.35, sheen: 0.45,
+  key: 1.1, keyColor: '#c4d4ff', rim: 1.9, rimColor: '#9fb4ff', ambient: 0.35, sheen: 0.45,
   // the painting is pure black behind the creature
   frame: false, floor: false, bgColor: '#000000',
   camera: 'gallery', frameW: 4.4, frameH: 2.6, frameD: 1.6, zoom: 0.9, sway: 0.25, fov: 26,

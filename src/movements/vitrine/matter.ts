@@ -19,7 +19,7 @@ export function createMatter(detail = 110) {
       uStretch: { value: new THREE.Vector3(1.22, 1, 1) }, uFlowScale: { value: 1.5 },
       uKeyDir: { value: new THREE.Vector3(-0.4, 0.7, 0.5).normalize() }, uKey: { value: 1 }, uAmbient: { value: 0.1 }, uRim: { value: 0.6 },
       uAlbedo: { value: 0.2 }, uSheen: { value: 0.5 }, uCrestGlow: { value: 0.9 },
-      uTint: { value: new THREE.Color(1, 1, 1) }, uCoreCol: { value: new THREE.Color(1, 0.7, 0.7) }, uCoreExtent: { value: new THREE.Vector3(1, 1, 1) }, uCoreMix: { value: 0 }, uCoreSize: { value: 0.7 }, uCoreGlow: { value: 0 }, uPatch: { value: 0 }, uPatchScale: { value: 1.2 }, uPatchCover: { value: 0.2 }, uCells: { value: 0 }, uCellScale: { value: 6 }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
+      uTint: { value: new THREE.Color(1, 1, 1) }, uCoreCol: { value: new THREE.Color(1, 0.7, 0.7) }, uCoreExtent: { value: new THREE.Vector3(1, 1, 1) }, uCoreMix: { value: 0 }, uCoreSize: { value: 0.7 }, uCoreGlow: { value: 0 }, uPatch: { value: 0 }, uPatchScale: { value: 1.2 }, uPatchCover: { value: 0.2 }, uCells: { value: 0 }, uCellScale: { value: 6 }, uVelvet: { value: 0 }, uVelvetSheen: { value: 0.8 }, uVelvetGloss: { value: 0.5 }, uSoftEdge: { value: 0 }, uGrain: { value: 0.5 }, uKeyCol: { value: new THREE.Color(1, 1, 1) }, uRimCol: { value: new THREE.Color(0.5, 0.55, 0.65) },
       uVeinA: { value: new THREE.Color() }, uVeinB: { value: new THREE.Color() }, uVeinC: { value: new THREE.Color() },
       uGrowth: { value: 1 }, uStreak: { value: 1 }, uStripes: { value: 40 },
       uNumSrc: { value: 0 }, uSrcPos: { value: [] as THREE.Vector4[] }, uSrcForce: { value: [] as THREE.Vector4[] }, uSrcCol: { value: [] as THREE.Vector4[] },
@@ -92,6 +92,7 @@ export function createMatter(detail = 110) {
       varying vec3 vDir;
       varying vec3 vPu;
       uniform float uPatch, uPatchScale, uPatchCover, uCells, uCellScale;
+      uniform float uVelvet, uVelvetSheen, uVelvetGloss, uSoftEdge, uGrain;
       vec3 hash33(vec3 p) { p = fract(p * vec3(0.1031, 0.1030, 0.0973)); p += dot(p, p.yxz + 33.33); return fract((p.xxy + p.yxx) * p.zyx); }
       // distance to the nearest cell wall (F2 - F1) of a 3D Voronoi pattern
       float cellWall(vec3 p) {
@@ -118,7 +119,8 @@ export function createMatter(detail = 110) {
         vec3 V = normalize(cameraPosition - vP);
         // frayed silhouette
         float graze = abs(dot(N, V));
-        if (dither > smoothstep(0.0, 0.07, graze)) discard;
+        // frayed (or, in velvet mode, soft and dusty) silhouette
+        if (dither > smoothstep(0.0, mix(0.07, 0.32, uSoftEdge), graze)) discard;
 
         // combed fibres: noise stretched along the flow direction
         float across = dot(vP, B);
@@ -156,6 +158,23 @@ export function createMatter(detail = 110) {
         col += uCoreCol * coreAmt(vP) * uCoreGlow * 0.12 * (0.4 + 0.6 * valley);
         col += vec3(0.9, 0.92, 1.0) * sheen * uKey * 0.06 * ao;
         col += uRimCol * rim * 0.05;
+
+        // velvet: a smooth, slightly translucent skin — soft wrapped light, a fuzzy lit edge,
+        // a silky highlight on the ridges and a very fine grain
+        if (uVelvet > 0.0) {
+          vec3 base = coreTint(vP, uTint) * uAlbedo;
+          float w = max(dot(N, L) * 0.5 + 0.5, 0.0);
+          vec3 vel = base * (uAmbient + pow(w, 1.6) * uKey * uKeyCol) * mix(0.45, 1.0, valley);
+          float fres = pow(1.0 - graze, 2.4);
+          vel += mix(base * 3.0, uRimCol, 0.45) * fres * uVelvetSheen * (0.35 + 0.65 * w);
+          float spec = pow(max(dot(N, normalize(L + V)), 0.0), 22.0);
+          vel += mix(vec3(1.0, 0.95, 0.92), coreTint(vP, uTint), 0.45) * spec * uVelvetGloss * uKey;
+          // translucency: light seems to pass through the thin rims of the folds
+          vel += base * 1.6 * pow(max(dot(-N, L), 0.0), 2.0) * fres * uVelvetSheen;
+          float grain = snoise3(vP * 150.0) * 0.5 + snoise3(vP * 41.0 + 3.0) * 0.5;
+          vel *= 1.0 + grain * uGrain * 0.35;
+          col = mix(col, vel, uVelvet);
+        }
 
         // veins of light along the crests, and kindled by notes
         float region = fract(sin(dot(floor(vP * 1.6), vec3(12.9, 78.2, 37.7))) * 43758.5);

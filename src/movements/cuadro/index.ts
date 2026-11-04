@@ -14,13 +14,18 @@ const PRESETS: Preset[] = [
     id: 'rosegarden', label: 'Rose & emerald',
     description: 'Emerald velvet folds around a glowing dusty-rose heart, rose silk threads and copper specks.',
     values: {
-      'cu.palette': 'rosegarden', 'cu.veinA': '#f2a487', 'cu.veinB': '#e8a0a8', 'cu.veinC': '#f6c8b8',
-      'cu.matterColor': '#4fa585', 'cu.coreColor': '#f0a6a8', 'cu.coreMix': 0.95, 'cu.coreSize': 0.75, 'cu.coreGlow': 2.4,
-      'cu.albedo': 0.3, 'cu.rimColor': '#7fd0b0', 'cu.rim': 1.3, 'cu.keyColor': '#f2e6e0',
-      'cu.patch': 0.5, 'cu.patchScale': 2.4, 'cu.patchCover': 0.3, 'cu.cells': 0, 'cu.veinShare': 0.04, 'cu.crestGlow': 0.5,
-      'cu.webs': 60, 'cu.webOpacity': 0.18, 'cu.webColor': '#f2b0a8',
-      'cu.smokeColor': '#2a5a48', 'cu.smokeTint': 0.15, 'cu.smokeStrands': 0.16, 'cu.smokeOpacity': 0.22, 'cu.dotOpacity': 0.05,
-      'cu.bend': 0.15, 'cu.width': 1.9, 'cu.height': 0.85, 'cu.lobes': 1.1, 'cu.radius': 0.92,
+      'cu.palette': 'rosegarden', 'cu.veinA': '#e9906f', 'cu.veinB': '#e8a0a8', 'cu.veinC': '#f6c8b8',
+      // two-tone velvet: emerald billows around a glowing dusty-rose heart
+      'cu.matterColor': '#3c8f72', 'cu.albedo': 0.55, 'cu.coreColor': '#e898a0', 'cu.coreMix': 1, 'cu.coreSize': 0.85, 'cu.coreGlow': 1.1,
+      'cu.velvet': 1, 'cu.velvetSheen': 1.0, 'cu.velvetGloss': 0.75, 'cu.softEdge': 0.75, 'cu.grainAmt': 0.8,
+      'cu.rimColor': '#8fe0c0', 'cu.rim': 1.2, 'cu.keyColor': '#fff0ea', 'cu.key': 1.15,
+      'cu.patch': 0.35, 'cu.patchScale': 2.6, 'cu.patchCover': 0.35, 'cu.cells': 0, 'cu.veinShare': 0, 'cu.crestGlow': 0.2,
+      // fine rose threads in parallel bundles across the gaps
+      'cu.webs': 264, 'cu.webBundle': 12, 'cu.webSpread': 0.35, 'cu.webOpacity': 0.28, 'cu.webColor': '#f6c0b8',
+      'cu.smokeColor': '#2a5a48', 'cu.smokeTint': 0.1, 'cu.smokeStrands': 0.14, 'cu.smokeOpacity': 0.18, 'cu.dotOpacity': 0.06,
+      // big soft billows of folded cloth
+      'cu.bend': 0.12, 'cu.width': 2.0, 'cu.height': 0.95, 'cu.depth': 0.9, 'cu.radius': 0.88, 'cu.lobes': 1.15, 'cu.lobeScale': 1.3,
+      'cu.folds': 0.42, 'cu.foldScale': 0.65, 'cu.warp': 0.8,
       'cu.wallColor': '#33373d', 'cu.lightColor': '#e6ecf2',
     },
   },

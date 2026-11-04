@@ -18,7 +18,7 @@ export class Webs {
       glslVersion: THREE.GLSL3,
       uniforms: {
         tPos: { value: null }, tNrm: { value: null }, uCount: { value: 1 }, uAlpha: { value: 0.3 }, uColor: { value: new THREE.Color(0.75, 0.82, 1) },
-        uTime: { value: 0 }, uMin: { value: 0.5 }, uMax: { value: 2.4 },
+        uTime: { value: 0 }, uMin: { value: 0.35 }, uMax: { value: 1.6 }, uSpread: { value: 0.25 }, uBundle: { value: 10 },
       },
       vertexShader: /* glsl */ `
         precision highp float;
@@ -29,6 +29,8 @@ export class Webs {
         uniform float uTime;
         uniform float uMin;
         uniform float uMax;
+        uniform float uSpread;
+        uniform float uBundle;
         in float aWeb;
         in float aT;
         out float vA;
@@ -41,15 +43,22 @@ export class Webs {
         }
         void main() {
           vec3 na, nb;
-          vec4 A = strandPoint(floor(hh(aWeb) * 1e6), na);
-          vec4 B = strandPoint(floor(hh(aWeb + 7.31) * 1e6), nb);
+          // threads come in bundles: same two anchor regions, running side by side
+          float bundle = floor((aWeb - 1.0) / uBundle);
+          float j = aWeb - bundle * uBundle;
+          vec4 A = strandPoint(floor(hh(bundle + 0.5) * 1e6), na);
+          vec4 B = strandPoint(floor(hh(bundle + 7.31) * 1e6), nb);
           float L = distance(A.xyz, B.xyz);
           if (L < uMin || L > uMax || dot(na, na) < 0.5 || dot(nb, nb) < 0.5) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); vA = 0.0; return; }
           float t = aT;
           vec3 p = mix(A.xyz, B.xyz, t);
           // bow outward (so the thread clears the surface), sag a little, and sway slowly
-          vec3 bow = normalize(na + nb + 1e-4) * L * 0.18;
-          p += bow * sin(3.14159 * t) - vec3(0.0, 1.0, 0.0) * L * 0.06 * sin(3.14159 * t);
+          vec3 nn = normalize(na + nb + 1e-4);
+          vec3 side = normalize(cross(B.xyz - A.xyz, nn) + 1e-5);
+          float off = (hh(aWeb * 3.17) - 0.5) * uSpread * L;
+          float lift = (hh(aWeb * 5.71) - 0.5) * uSpread * L * 0.5;
+          float s = sin(3.14159 * t);
+          p += side * off * (0.35 + 0.65 * s) + nn * (L * 0.07 + lift) * s - vec3(0.0, 1.0, 0.0) * L * 0.03 * s;
           p += vec3(sin(uTime * 0.7 + aWeb), cos(uTime * 0.5 + aWeb * 1.3), 0.0) * 0.02 * sin(3.14159 * t);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
           vA = 0.4 + 0.6 * sin(3.14159 * t);

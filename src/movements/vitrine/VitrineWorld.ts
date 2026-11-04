@@ -579,6 +579,11 @@ export class VitrineWorld implements MovementInstance {
     mu.uPatchCover.value = p.num(this.k('patchCover'));
     mu.uCells.value = p.num(this.k('cells'));
     mu.uCellScale.value = p.num(this.k('cellScale'));
+    mu.uVelvet.value = p.num(this.k('velvet'));
+    mu.uVelvetSheen.value = p.num(this.k('velvetSheen'));
+    mu.uVelvetGloss.value = p.num(this.k('velvetGloss'));
+    mu.uSoftEdge.value = p.num(this.k('softEdge'));
+    mu.uGrain.value = p.num(this.k('grainAmt'));
     mu.uKeyCol.value.copy(keyCol);
     mu.uRimCol.value.copy(rimCol);
     mu.uSheen.value = p.num(this.k('sheen'));
@@ -594,7 +599,7 @@ export class VitrineWorld implements MovementInstance {
 
     // the strands
     const nStr = parseInt(p.str(this.k('strands')), 10) || 0;
-    this.strands.mesh.visible = nStr > 0;
+    this.strands.mesh.visible = nStr > 0 && p.bool(this.k('skinStrands'));
     if (nStr > 0) {
       this.strands.setCount(nStr);
       const tu = this.strands.traceMat.uniforms;
@@ -652,15 +657,17 @@ export class VitrineWorld implements MovementInstance {
       wu.uAlpha.value = p.num(this.k('webOpacity'));
       wu.uColor.value.set(p.str(this.k('webColor')));
       wu.uTime.value = time;
+      wu.uSpread.value = p.num(this.k('webSpread'));
+      wu.uBundle.value = Math.max(1, Math.round(p.num(this.k('webBundle'))));
       su.uTime.value = time;
       su.uVeinA.value.set(pal.a);
       su.uVeinB.value.set(pal.b);
       su.uVeinC.value.set(pal.c);
       su.uNumSrc.value = live.length;
       // with strands on, the body underneath is a dark filler between them
-      mu.uStreak.value *= 0.08;
-      mu.uCrestGlow.value *= 0.12;
-      mu.uAlbedo.value *= 0.55;
+      if (p.bool(this.k('skinStrands'))) mu.uStreak.value *= 0.08;
+      if (p.bool(this.k('skinStrands'))) mu.uCrestGlow.value *= 0.12;
+      if (p.bool(this.k('skinStrands'))) mu.uAlbedo.value *= 0.55;
     }
 
     // more particles → each one fainter, so the mass keeps its density

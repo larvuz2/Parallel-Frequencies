@@ -151,6 +151,12 @@ const NEW_PARAMS: ParamDef[] = [
 
   /* strands */
   { key: 'vt.matterColor', label: 'Matter colour', group: 'strands', type: 'color', default: '#ffffff', hint: 'Tints the strands and body. White keeps the neutral grey.' },
+  { key: 'vt.skinStrands', label: 'Strand skin', group: 'strands', type: 'toggle', default: true, hint: 'Off: the surface is drawn as a smooth body (best with Velvet); smoke strands still drift off the edges.' },
+  { key: 'vt.velvet', label: 'Velvet surface', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0, format: pct, hint: 'A smooth, slightly translucent velvety skin with a fuzzy lit edge, instead of combed fibres.' },
+  { key: 'vt.velvetSheen', label: 'Velvet edge glow', group: 'strands', type: 'range', min: 0, max: 3, step: 0.01, default: 0.8, format: x2 },
+  { key: 'vt.velvetGloss', label: 'Silky highlights', group: 'strands', type: 'range', min: 0, max: 3, step: 0.01, default: 0.5, format: x2 },
+  { key: 'vt.softEdge', label: 'Soft dusty edges', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0, format: pct },
+  { key: 'vt.grainAmt', label: 'Fine grain', group: 'strands', type: 'range', min: 0, max: 2, step: 0.01, default: 0.5, format: x2 },
   { key: 'vt.coreColor', label: 'Core colour', group: 'strands', type: 'color', default: '#e8a0a0', hint: 'A second colour that fills the heart of the mass, blending out to the Matter colour at the edges.' },
   { key: 'vt.coreMix', label: 'Core amount', group: 'strands', type: 'range', min: 0, max: 1, step: 0.01, default: 0, format: pct, hint: '0 = one colour only.' },
   { key: 'vt.coreSize', label: 'Core size', group: 'strands', type: 'range', min: 0.1, max: 1.5, step: 0.01, default: 0.7, format: x2, hint: 'How far the core colour reaches toward the outer folds.' },
@@ -179,6 +185,8 @@ const NEW_PARAMS: ParamDef[] = [
   { key: 'vt.cellScale', label: 'Cell size', group: 'veins', type: 'range', min: 1, max: 20, step: 0.1, default: 6, format: (v) => v.toFixed(1), hint: 'Higher: smaller, denser cells.' },
   { key: 'vt.webs', label: 'Web threads', group: 'smoke', type: 'range', min: 0, max: 600, step: 1, default: 0, hint: 'Fine silk threads spun across the matter.' },
   { key: 'vt.webOpacity', label: 'Thread brightness', group: 'smoke', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.35, format: x2 },
+  { key: 'vt.webBundle', label: 'Threads per bundle', group: 'smoke', type: 'range', min: 1, max: 40, step: 1, default: 1, hint: 'Threads come in parallel bundles spanning the gaps.' },
+  { key: 'vt.webSpread', label: 'Bundle spread', group: 'smoke', type: 'range', min: 0, max: 1, step: 0.01, default: 0.25, format: x2 },
   { key: 'vt.webColor', label: 'Thread colour', group: 'smoke', type: 'color', default: '#c0d0ff' },
 
   /* lighting */
@@ -244,8 +252,8 @@ const GROUP_OF: Record<string, string> = {
 const ORDER = [
   'vt.camera', 'vt.zoom', 'vt.camHeight', 'vt.fov', 'vt.camSpeed', 'vt.sway',
   'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.bend', 'vt.bendFreq', 'vt.folds', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
-  'vt.strands', 'vt.matterColor', 'vt.coreColor', 'vt.coreMix', 'vt.coreSize', 'vt.coreGlow', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
-  'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade', 'vt.webs', 'vt.webOpacity', 'vt.webColor',
+  'vt.strands', 'vt.skinStrands', 'vt.velvet', 'vt.velvetSheen', 'vt.velvetGloss', 'vt.softEdge', 'vt.grainAmt', 'vt.matterColor', 'vt.coreColor', 'vt.coreMix', 'vt.coreSize', 'vt.coreGlow', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
+  'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade', 'vt.webs', 'vt.webBundle', 'vt.webSpread', 'vt.webOpacity', 'vt.webColor',
   'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.patch', 'vt.patchScale', 'vt.patchCover', 'vt.cells', 'vt.cellScale', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',
   'vt.key', 'vt.keyColor', 'vt.keyAz', 'vt.keyEl', 'vt.ambient', 'vt.rim', 'vt.rimColor', 'vt.sheen', 'vt.gloss',
   'vt.frame', 'vt.woodTexture', 'vt.woodRelief', 'vt.wood', 'vt.woodTint', 'vt.frameW', 'vt.frameH', 'vt.frameD', 'vt.beam', 'vt.woodRough', 'vt.woodCoat', 'vt.grain', 'vt.woodLight',
