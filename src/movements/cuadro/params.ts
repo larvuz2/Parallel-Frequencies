@@ -8,21 +8,21 @@ const x3 = (v: number) => v.toFixed(3);
 /** The look of the reference: a navy, snaking body flecked with amber, membranes, webs and dust. */
 const LOOK: Record<string, ParamValue> = {
   // shape
-  radius: 0.95, width: 1.95, height: 0.82, depth: 0.85, lobes: 0.7, lobeScale: 1.25, folds: 0.28, foldScale: 0.75, warp: 0.6,
-  bend: 0.42, bendFreq: 1.15, breathe: 1, evolve: 0.02,
+  radius: 1.0, width: 2.35, height: 0.72, depth: 0.85, lobes: 0.95, lobeScale: 1.45, folds: 0.3, foldScale: 0.8, warp: 0.6,
+  bend: 0.24, bendFreq: 1.7, breathe: 1, evolve: 0.02,
   // strands: short and fine, so the skin reads as a grainy, sparkling surface
   strands: '65536', matterColor: '#5672d6', albedo: 0.32, toneVar: 0.65, strandWidth: 2.1, strandLength: 0.22, contour: 0.3, sweep: 1.4, thickness: 0.18,
   // smoke & dust
   smokeStrands: 0.12, smokeOpacity: 0.16, smokeColor: '#28324c', smokeTint: 0.3, warmShare: 0.06, smokeLength: 1.5, smokeWidth: 0.7, frontFade: 0.9,
-  dotOpacity: 0.4, dotSize: 0.8, wisps: 0.3, wispReach: 0.6,
-  webs: 140, webOpacity: 0.45, webColor: '#c8d4ff',
+  dotOpacity: 0.14, dotSize: 0.7, wisps: 0.25, wispReach: 0.5,
+  webs: 60, webOpacity: 0.22, webColor: '#b8c8ff',
   // light & colour
-  palette: 'nocturne', veinA: '#ff9a3c', veinB: '#7aa0ff', veinC: '#cfe0ff', veinShare: 0.025, crestGlow: 0.35, veinThreshold: 0.9,
-  patch: 1.7, patchScale: 1.1, patchCover: 0.1, cells: 1, cellScale: 7,
+  palette: 'nocturne', veinA: '#ff9a3c', veinB: '#7aa0ff', veinC: '#9fb8ff', veinShare: 0.025, crestGlow: 0.35, veinThreshold: 0.9,
+  patch: 0.9, patchScale: 1.6, patchCover: 0.25, cells: 0.55, cellScale: 9,
   key: 1.1, keyColor: '#c4d4ff', rim: 1.3, rimColor: '#a8bcff', ambient: 0.35, sheen: 0.45,
   // the painting is pure black behind the creature
   frame: false, floor: false, bgColor: '#000000',
-  camera: 'gallery', frameW: 5.0, frameH: 2.9, frameD: 1.6, zoom: 0.92, sway: 0.25, fov: 26,
+  camera: 'gallery', frameW: 4.4, frameH: 2.6, frameD: 1.6, zoom: 0.9, sway: 0.25, fov: 26,
   // growth
   accumulate: true,
 };
@@ -61,7 +61,7 @@ export const CUADRO_ROOM_PARAMS: ParamDef[] = [
   { key: 'cu.panelBright', label: 'Painting brightness', group: 'room', type: 'range', min: 0.3, max: 2.5, step: 0.01, default: 1.05, format: x2 },
   { key: 'cu.glass', label: 'Glass reflection', group: 'room', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.04, format: pct, hint: 'A faint sheen across the painting, as if behind glass.' },
   { key: 'cu.frameWood', label: 'Frame wood', group: 'room', type: 'select', default: 'walnut', options: WOOD_OPTIONS },
-  { key: 'cu.frameTint', label: 'Frame tint', group: 'room', type: 'color', default: '#ffffff' },
+  { key: 'cu.frameTint', label: 'Frame tint', group: 'room', type: 'color', default: '#7a6658' },
   { key: 'cu.frameBorder', label: 'Frame width', group: 'room', type: 'range', min: 0.004, max: 0.09, step: 0.001, default: 0.016, format: x3 },
   { key: 'cu.frameDepth', label: 'Frame depth', group: 'room', type: 'range', min: 0.005, max: 0.12, step: 0.001, default: 0.03, format: x3 },
   { key: 'cu.frameGloss', label: 'Frame varnish', group: 'room', type: 'range', min: 0, max: 1, step: 0.01, default: 0.3, format: pct },
