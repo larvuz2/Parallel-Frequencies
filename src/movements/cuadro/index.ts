@@ -8,7 +8,7 @@ const PRESETS: Preset[] = [
   {
     id: 'nocturne', label: 'Nocturne — the living painting',
     description: 'A navy, snaking body flecked with amber light, glowing membranes and silk threads, on a dark plaster wall.',
-    values: { 'cu.palette': 'nocturne', 'cu.veinA': '#ff9a3c', 'cu.veinB': '#7aa0ff', 'cu.veinC': '#9fb8ff', 'cu.matterColor': '#5672d6' },
+    values: { 'cu.palette': 'nocturne', 'cu.veinA': '#ff9a3c', 'cu.veinB': '#7aa0ff', 'cu.veinC': '#9fb8ff', 'cu.matterColor': '#3f55b0' },
   },
   {
     id: 'ember', label: 'Ember tide',
