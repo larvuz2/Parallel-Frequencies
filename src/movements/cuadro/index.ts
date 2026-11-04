@@ -15,7 +15,7 @@ const PRESETS: Preset[] = [
     description: 'Emerald velvet folds around a glowing dusty-rose heart; rose silk threads and copper specks.',
     values: {
       'cu.engine': 'raymarch',
-      'cu.rmOuter': '#174a39', 'cu.rmInner': '#c87882', 'cu.rmDepthMix': 2.6, 'cu.rmGlowColor': '#ff9a8a', 'cu.rmNoteColor': '#ffb8a0',
+      'cu.rmOuter': '#174a39', 'cu.rmInner': '#b86c78', 'cu.rmDepthMix': 1.5, 'cu.rmCore': 0.32, 'cu.rmKey': 0.75, 'cu.rmFrame': 1.4, 'cu.rmThickness': 0.2, 'cu.rmGlowColor': '#ff9a8a', 'cu.rmNoteColor': '#ffb8a0',
       'cu.rmRimColor': '#7fd8b4', 'cu.rmSpeckColor': '#e08a5a', 'cu.rmDustColor': '#5fa88a', 'cu.rmLightColor': '#fff0ea',
       'cu.rmThreadColor': '#f2b8b0', 'cu.rmThreadsPer': 24, 'cu.rmThreadBundles': 6, 'cu.rmThreadOpacity': 0.25,
       'cu.rmSpeck': 0.35, 'cu.rmGlow': 1.4, 'cu.rmTranslucency': 0.7, 'cu.rmSeparation': 1.9, 'cu.rmBalance': 0.25, 'cu.rmTilt': 0.2,

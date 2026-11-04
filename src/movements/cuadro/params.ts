@@ -122,7 +122,7 @@ export const CUADRO_RM_PARAMS: ParamDef[] = [
   { key: 'cu.rmThickness', label: 'Cloth thickness', group: 'rmShape', type: 'range', min: 0.02, max: 0.5, step: 0.005, default: 0.16, format: x3, hint: 'Thin: delicate translucent sheets. Thick: heavy velvet.' },
   { key: 'cu.rmWarp', label: 'Crumple', group: 'rmShape', type: 'range', min: 0, max: 3, step: 0.01, default: 1.2, format: x2, hint: 'How twisted and crumpled the folds are.' },
   { key: 'cu.rmTwist', label: 'Twist', group: 'rmShape', type: 'range', min: -1.5, max: 1.5, step: 0.01, default: 0.2, format: x2 },
-  { key: 'cu.rmCore', label: 'Heart size', group: 'rmShape', type: 'range', min: 0, max: 1, step: 0.01, default: 0.55, format: pct, hint: 'A solid inner core that shows through the folds.' },
+  { key: 'cu.rmCore', label: 'Heart size', group: 'rmShape', type: 'range', min: 0, max: 1, step: 0.01, default: 0.32, format: pct, hint: 'A solid inner core that shows through the folds.' },
   { key: 'cu.rmEvolve', label: 'Slow change', group: 'rmShape', type: 'range', min: 0, max: 0.3, step: 0.001, default: 0.04, format: x3, hint: 'How fast the folds move. Tension speeds it up (Mapping).' },
   { key: 'cu.rmSwell', label: 'Swell under notes', group: 'rmShape', type: 'range', min: 0, max: 3, step: 0.01, default: 0.8, format: x2 },
 
@@ -163,7 +163,7 @@ export const CUADRO_RM_PARAMS: ParamDef[] = [
   { key: 'cu.rmThreadColor', label: 'Colour', group: 'rmThreads', type: 'color', default: '#c8d4ff' },
   { key: 'cu.rmSeed', label: 'Variation', group: 'rmThreads', type: 'range', min: 1, max: 99, step: 1, default: 7, hint: 'A different arrangement of the bundles.' },
 
-  { key: 'cu.rmFrame', label: 'Framing', group: 'rmView', type: 'range', min: 0.6, max: 2, step: 0.01, default: 1.12, format: (v) => `${x2(v)}×`, hint: 'How much of the painting the creature fills (higher = smaller).' },
+  { key: 'cu.rmFrame', label: 'Framing', group: 'rmView', type: 'range', min: 0.6, max: 2, step: 0.01, default: 1.4, format: (v) => `${x2(v)}×`, hint: 'How much of the painting the creature fills (higher = smaller).' },
   { key: 'cu.rmYaw', label: 'Turn', group: 'rmView', type: 'range', min: -60, max: 60, step: 1, default: 0, format: deg },
   { key: 'cu.rmPitch', label: 'Look from above', group: 'rmView', type: 'range', min: -40, max: 40, step: 1, default: 6, format: deg },
   { key: 'cu.rmOffsetY', label: 'Vertical offset', group: 'rmView', type: 'range', min: -1, max: 1, step: 0.01, default: 0, format: x2 },
