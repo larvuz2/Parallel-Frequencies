@@ -146,6 +146,7 @@ const NEW_PARAMS: ParamDef[] = [
   { key: 'vt.offsetY', label: 'Vertical position', group: 'shape', type: 'range', min: -1, max: 1, step: 0.01, default: 0, format: x2 },
   { key: 'vt.spin', label: 'Rotation', group: 'shape', type: 'range', min: -0.4, max: 0.4, step: 0.005, default: 0, format: (v) => `${v.toFixed(3)} rad/s`, hint: 'Slowly turns the whole mass.' },
 
+  { key: 'vt.roundness', label: 'Fold roundness', group: 'shape', type: 'range', min: 0.005, max: 0.6, step: 0.005, default: 0.03, format: (v) => v.toFixed(3), hint: 'Low: sharp creases. High: soft rounded billows like heavy cloth.' },
   { key: 'vt.bend', label: 'Snake / twist', group: 'shape', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0, format: x2, hint: 'Bends the mass into a twisting, snaking body along its length.' },
   { key: 'vt.bendFreq', label: 'Twist frequency', group: 'shape', type: 'range', min: 0.2, max: 3, step: 0.01, default: 1, format: x2 },
 
@@ -251,7 +252,7 @@ const GROUP_OF: Record<string, string> = {
 /** Order inside each section: listed keys first (in this order), then the rest. */
 const ORDER = [
   'vt.camera', 'vt.zoom', 'vt.camHeight', 'vt.fov', 'vt.camSpeed', 'vt.sway',
-  'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.bend', 'vt.bendFreq', 'vt.folds', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
+  'vt.radius', 'vt.width', 'vt.height', 'vt.depth', 'vt.lobes', 'vt.lobeScale', 'vt.bend', 'vt.bendFreq', 'vt.folds', 'vt.roundness', 'vt.foldScale', 'vt.warp', 'vt.evolve', 'vt.breathe', 'vt.offsetY', 'vt.spin',
   'vt.strands', 'vt.skinStrands', 'vt.velvet', 'vt.velvetSheen', 'vt.velvetGloss', 'vt.softEdge', 'vt.grainAmt', 'vt.matterColor', 'vt.coreColor', 'vt.coreMix', 'vt.coreSize', 'vt.coreGlow', 'vt.albedo', 'vt.toneVar', 'vt.strandWidth', 'vt.strandLength', 'vt.contour', 'vt.sweep', 'vt.thickness',
   'vt.smokeStrands', 'vt.smokeOpacity', 'vt.smokeColor', 'vt.smokeTint', 'vt.warmShare', 'vt.smokeLength', 'vt.smokeLift', 'vt.smokeCurl', 'vt.smokeWidth', 'vt.smokeBright', 'vt.frontFade', 'vt.webs', 'vt.webBundle', 'vt.webSpread', 'vt.webOpacity', 'vt.webColor',
   'vt.palette', 'vt.veinA', 'vt.veinB', 'vt.veinC', 'vt.veinShare', 'vt.veinThreshold', 'vt.crestGlow', 'vt.pulse', 'vt.patch', 'vt.patchScale', 'vt.patchCover', 'vt.cells', 'vt.cellScale', 'vt.noteGlow', 'vt.glowRadius', 'vt.glowDecay', 'vt.swell',

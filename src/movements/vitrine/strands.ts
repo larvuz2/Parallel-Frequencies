@@ -332,7 +332,7 @@ export class Strands {
       fragmentShader: TRACE_FRAG,
       uniforms: {
         uPrevPos: { value: null }, uPrevNrm: { value: null }, uStep: { value: 0.045 }, uContour: { value: 0.6 }, uSweep: { value: 0.9 }, uWispShare: { value: 0.1 }, uWispLift: { value: 1 }, uWispTurb: { value: 1 }, uWispLen: { value: 2.5 },
-        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 }, uBend: { value: 0 }, uBendFreq: { value: 1 },
+        uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 1 }, uWarp: { value: 0.9 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 }, uBend: { value: 0 }, uRound: { value: 0.03 }, uBendFreq: { value: 1 },
         uStretch: { value: new THREE.Vector3(1.2, 1, 1) },
       },
       depthTest: false,

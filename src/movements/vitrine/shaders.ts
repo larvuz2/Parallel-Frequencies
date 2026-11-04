@@ -77,6 +77,7 @@ uniform vec3 uStretch;
 uniform float uLobe;
 uniform float uLobeScale;
 uniform float uBend;
+uniform float uRound;
 uniform float uBendFreq;
 
 /** sideways displacement that bends the mass into a twisting, snaking body (depends on x only) */
@@ -93,7 +94,7 @@ float disp(vec3 p) {
   vec3 q = p * uFreq + vec3(0.0, uTime * uEvolve, uTime * uEvolve * 0.6);
   vec3 w = vec3(snoise3(q * 0.5 + 1.7), snoise3(q * 0.5 + 9.2), snoise3(q * 0.5 + 4.4)) * uWarp;
   float r0 = snoise3(q + w);
-  float r1 = 1.0 - sqrt(r0 * r0 + 0.03);             // rounded crests: billows, not spikes
+  float r1 = 1.0 - sqrt(r0 * r0 + uRound) + sqrt(uRound) - 0.17;             // rounded crests: billows, not spikes
   float r2 = snoise3(q * 2.3 + w * 1.6) * 0.3;
   // large lobes give the mass an irregular, cloud-like silhouette
   // large lobes — the mass is a pile of folded billows, not a ball

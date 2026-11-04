@@ -305,7 +305,7 @@ export class VitrineWorld implements MovementInstance {
     this.gpu.setVariableDependencies(this.nrmVar, [this.posVar]);
     this.gpu.setVariableDependencies(this.glowVar, [this.posVar, this.glowVar]);
     const field = () => ({
-      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 }, uBend: { value: 0 }, uBendFreq: { value: 1 },
+      uTime: { value: 0 }, uR: { value: 1.2 }, uAmp: { value: 0.5 }, uFreq: { value: 0.9 }, uWarp: { value: 0.8 }, uEvolve: { value: 0.02 }, uLobe: { value: 0.6 }, uLobeScale: { value: 1 }, uBend: { value: 0 }, uRound: { value: 0.03 }, uBendFreq: { value: 1 },
       uStretch: { value: new THREE.Vector3(1.25, 1, 1) },
     });
     Object.assign(this.nrmVar.material.uniforms, field());
@@ -457,6 +457,7 @@ export class VitrineWorld implements MovementInstance {
       u.uStretch.value.set(p.num(this.k('width')), p.num(this.k('height')), p.num(this.k('depth')));
       u.uLobeScale.value = p.num(this.k('lobeScale'));
       u.uBend.value = p.num(this.k('bend'));
+      u.uRound.value = p.num(this.k('roundness'));
       u.uBendFreq.value = p.num(this.k('bendFreq'));
     }
     const vu = this.velVar.material.uniforms;
@@ -555,7 +556,7 @@ export class VitrineWorld implements MovementInstance {
     // the body of the matter
     const mu = (this.matter.material as THREE.ShaderMaterial).uniforms;
     const nu = this.nrmVar.material.uniforms;
-    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale', 'uBend', 'uBendFreq']) mu[k].value = nu[k].value;
+    for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale', 'uBend', 'uBendFreq', 'uRound']) mu[k].value = nu[k].value;
     mu.uStretch.value.copy(nu.uStretch.value);
     mu.uFlowScale.value = p.num(this.k('flowScale'));
     mu.uKeyDir.value.copy(keyDir);
@@ -603,7 +604,7 @@ export class VitrineWorld implements MovementInstance {
     if (nStr > 0) {
       this.strands.setCount(nStr);
       const tu = this.strands.traceMat.uniforms;
-      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale', 'uBend', 'uBendFreq']) tu[k].value = nu[k].value;
+      for (const k of ['uTime', 'uR', 'uAmp', 'uFreq', 'uWarp', 'uEvolve', 'uLobe', 'uLobeScale', 'uBend', 'uBendFreq', 'uRound']) tu[k].value = nu[k].value;
       tu.uStretch.value.copy(nu.uStretch.value);
       tu.uStep.value = p.num(this.k('strandLength')) / 15;
       tu.uContour.value = p.num(this.k('contour'));

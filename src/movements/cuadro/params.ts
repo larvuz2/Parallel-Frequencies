@@ -9,7 +9,7 @@ const x3 = (v: number) => v.toFixed(3);
 const LOOK: Record<string, ParamValue> = {
   // shape
   radius: 0.9, width: 2.05, height: 0.72, depth: 0.85, lobes: 0.95, lobeScale: 1.45, folds: 0.3, foldScale: 0.8, warp: 0.6,
-  bend: 0.24, bendFreq: 1.7, breathe: 1, evolve: 0.02,
+  bend: 0.24, bendFreq: 1.7, roundness: 0.25, breathe: 1, evolve: 0.02,
   // strands: short and fine, so the skin reads as a grainy, sparkling surface
   strands: '65536', matterColor: '#33479f', albedo: 0.5, toneVar: 0.7, strandWidth: 1.7, strandLength: 0.1, contour: 0.3, sweep: 1.4, thickness: 0.18,
   // the reference is a smooth velvety skin, not combed fibres
