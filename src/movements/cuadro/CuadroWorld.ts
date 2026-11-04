@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { ControlEvent, EngineContext, MovementInstance, NoteOffEvent, NoteOnEvent, PointerState } from '../../core/types';
 import { simplex3 } from '../../core/noise';
 import { VitrineWorld } from '../vitrine/VitrineWorld';
+import { RaymarchCreature } from './RaymarchCreature';
 
 /**
  * Cuadro — a living painting. The 3D creature (the Vitrine engine with its own parameters) is
@@ -9,7 +10,8 @@ import { VitrineWorld } from '../vitrine/VitrineWorld';
  * room with drifting smoke. The viewer stands in front of it, barely moving.
  */
 export class CuadroWorld implements MovementInstance {
-  private inner: VitrineWorld;
+  private inner: MovementInstance;
+  private engineId = '';
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 100);
   private target: THREE.WebGLRenderTarget;
@@ -39,7 +41,8 @@ export class CuadroWorld implements MovementInstance {
     this.width = s.x;
     this.height = s.y;
     this.target = new THREE.WebGLRenderTarget(s.x, s.y, { type: THREE.HalfFloatType, samples: 4 });
-    this.inner = new VitrineWorld(ctx, { prefix: 'cu.' });
+    this.engineId = ctx.params.str('cu.engine');
+    this.inner = this.makeInner(this.engineId);
 
     this.scene.background = new THREE.Color(0x050505);
     this.wallMat = new THREE.MeshStandardMaterial({ color: 0x3a3d42, roughness: 0.95, metalness: 0 });
@@ -119,6 +122,10 @@ export class CuadroWorld implements MovementInstance {
     return this.ctx.params.bool('cu.room') ? this.target.texture : this.inner.output;
   }
 
+  private makeInner(id: string): MovementInstance {
+    return id === 'strands' ? new VitrineWorld(this.ctx, { prefix: 'cu.' }) : new RaymarchCreature(this.ctx);
+  }
+
   /* ---------------------------------------------------------------------------- music */
   noteOn(e: NoteOnEvent) { this.inner.noteOn(e); }
   noteOff(e: NoteOffEvent) { this.inner.noteOff(e); }
@@ -164,6 +171,13 @@ export class CuadroWorld implements MovementInstance {
   update(dt: number, time: number, pointers: PointerState[]) {
     const p = this.ctx.params;
     const room = p.bool('cu.room');
+    const eng = p.str('cu.engine');
+    if (eng !== this.engineId) {
+      this.engineId = eng;
+      this.inner.dispose();
+      this.inner = this.makeInner(eng);
+      this.innerSize = '';
+    }
 
     // ---- size of the painting, and the creature's render to match it
     const aspect = p.num('cu.panelAspect');
