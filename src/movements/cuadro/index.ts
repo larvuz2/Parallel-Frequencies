@@ -25,7 +25,7 @@ const PRESETS: Preset[] = [
       'cu.smokeColor': '#2a5a48', 'cu.smokeTint': 0.1, 'cu.smokeStrands': 0.14, 'cu.smokeOpacity': 0.18, 'cu.dotOpacity': 0.06,
       // big soft billows of folded cloth
       'cu.bend': 0.1, 'cu.width': 1.6, 'cu.height': 0.95, 'cu.depth': 0.9, 'cu.radius': 1.0, 'cu.lobes': 0.5, 'cu.lobeScale': 1.1, 'cu.roundness': 0.3,
-      'cu.folds': 0.5, 'cu.foldScale': 1.15, 'cu.warp': 1.1,
+      'cu.folds': 0.5, 'cu.foldScale': 0.7, 'cu.warp': 0.9,
       'cu.wallColor': '#33373d', 'cu.lightColor': '#e6ecf2',
     },
   },
