@@ -69,7 +69,7 @@ export const CUADRO_ROOM_PARAMS: ParamDef[] = [
   { key: 'cu.panelAspect', label: 'Painting proportion', group: 'room', type: 'range', min: 1, max: 2.4, step: 0.01, default: 1.62, format: (v) => `${x2(v)} : 1` },
   { key: 'cu.panelSize', label: 'Painting size', group: 'room', type: 'range', min: 0.4, max: 0.98, step: 0.01, default: 0.74, format: pct, hint: 'Height of the painting relative to the view.' },
   { key: 'cu.panelBright', label: 'Painting brightness', group: 'room', type: 'range', min: 0.3, max: 2.5, step: 0.01, default: 1.05, format: x2 },
-  { key: 'cu.glass', label: 'Glass reflection', group: 'room', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.04, format: pct, hint: 'A faint sheen across the painting, as if behind glass.' },
+  { key: 'cu.glass', label: 'Glass reflection', group: 'room', type: 'range', min: 0, max: 0.4, step: 0.005, default: 0.012, format: pct, hint: 'A faint sheen across the painting, as if behind glass.' },
   { key: 'cu.frameWood', label: 'Frame wood', group: 'room', type: 'select', default: 'walnut', options: WOOD_OPTIONS },
   { key: 'cu.frameTint', label: 'Frame tint', group: 'room', type: 'color', default: '#7a6658' },
   { key: 'cu.frameBorder', label: 'Frame width', group: 'room', type: 'range', min: 0.004, max: 0.09, step: 0.001, default: 0.016, format: x3 },

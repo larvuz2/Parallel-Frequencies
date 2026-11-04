@@ -4,6 +4,14 @@ import { VITRINE_ROUTES, VITRINE_TARGETS } from '../vitrine/params';
 import { CuadroWorld } from './CuadroWorld';
 import { CUADRO_GROUPS, CUADRO_PARAMS } from './params';
 
+/** The dark-velvet basis shared by the raymarched presets: the light lives in rims, specks and the heart. */
+const VELVET = {
+  'cu.engine': 'raymarch', 'cu.rmKey': 0.5, 'cu.rmAmbient': 0.05, 'cu.rmRim': 1.05, 'cu.rmTranslucency': 0.4, 'cu.rmGloss': 0.3, 'cu.rmGlow': 0.7,
+  'cu.rmSpeck': 1.2, 'cu.rmDust': 0.1, 'cu.rmHaze': 0.2, 'cu.rmDepthMix': 0.9,
+  'cu.rmSeparation': 1.7, 'cu.rmBridge': 0.8, 'cu.rmFray': 0.25, 'cu.rmLumpy': 0.6, 'cu.rmFoldScale': 0.8, 'cu.rmTwist': 0.3,
+  'cu.rmCore': 0.22, 'cu.rmThickness': 0.22, 'cu.rmFrame': 1.42, 'cu.rmThreadBundles': 4, 'cu.rmThreadOpacity': 0.18,
+};
+
 const PRESETS: Preset[] = [
   {
     id: 'nocturne', label: 'Nocturne — the living painting',
@@ -12,7 +20,7 @@ const PRESETS: Preset[] = [
       'cu.engine': 'raymarch',
       // near-black navy velvet; the light lives in pale-blue rims and amber glitter
       'cu.rmOuter': '#141c44', 'cu.rmInner': '#1c2758', 'cu.rmDepthMix': 0.8, 'cu.rmGlowColor': '#ff8a3a', 'cu.rmNoteColor': '#ffb070',
-      'cu.rmRimColor': '#8aa4ff', 'cu.rmSpeckColor': '#ff9a3c', 'cu.rmDustColor': '#6a80c8', 'cu.rmLightColor': '#c8d6ff',
+      'cu.rmRimColor': '#6f88e0', 'cu.rmSpeckColor': '#ff9a3c', 'cu.rmDustColor': '#6a80c8', 'cu.rmLightColor': '#c8d6ff',
       'cu.rmKey': 0.5, 'cu.rmAmbient': 0.05, 'cu.rmRim': 1.05, 'cu.rmTranslucency': 0.35, 'cu.rmGloss': 0.3, 'cu.rmGlow': 0.6,
       'cu.rmSpeck': 1.6, 'cu.rmDust': 0.1, 'cu.rmHaze': 0.2,
       'cu.rmSeparation': 1.6, 'cu.rmBridge': 0.8, 'cu.rmFray': 0.25, 'cu.rmLumpy': 0.6, 'cu.rmFoldScale': 0.8, 'cu.rmTwist': 0.35,
@@ -34,22 +42,24 @@ const PRESETS: Preset[] = [
   },
   {
     id: 'ember', label: 'Ember tide',
-    description: 'Charcoal folds lit from inside by a burning orange heart.',
-    values: { 'cu.engine': 'raymarch', 'cu.rmOuter': '#2a2c38', 'cu.rmInner': '#7a3a24', 'cu.rmGlowColor': '#ff6a2a', 'cu.rmNoteColor': '#ffb04a',
-      'cu.rmRimColor': '#ffb08a', 'cu.rmSpeckColor': '#ff8a3a', 'cu.rmDustColor': '#a8705a', 'cu.rmGlow': 2, 'cu.rmSpeck': 1, 'cu.lightColor': '#ffe2c4', 'cu.frameWood': 'wenge' },
+    description: 'Charred folds lit from inside by a burning orange heart.',
+    values: { ...VELVET, 'cu.rmOuter': '#2a1810', 'cu.rmInner': '#5a2a18', 'cu.rmGlowColor': '#ff6a2a', 'cu.rmNoteColor': '#ffb04a',
+      'cu.rmRimColor': '#e0805a', 'cu.rmSpeckColor': '#ffb04a', 'cu.rmDustColor': '#8a5a3a', 'cu.rmLightColor': '#ffe2c4', 'cu.rmGlow': 1.1,
+      'cu.rmThreadColor': '#ffc8a0', 'cu.lightColor': '#ffe2c4', 'cu.frameWood': 'wenge' },
   },
   {
     id: 'glacial', label: 'Glacial',
-    description: 'Ice-blue translucent sheets around a pale glowing heart, in an ebony frame on honed stone.',
-    values: { 'cu.engine': 'raymarch', 'cu.rmOuter': '#5f9ccc', 'cu.rmInner': '#cfe6f6', 'cu.rmGlowColor': '#bfe8ff', 'cu.rmNoteColor': '#ffffff',
-      'cu.rmRimColor': '#e2f6ff', 'cu.rmSpeckColor': '#9fd8ff', 'cu.rmDustColor': '#a8d0ec', 'cu.rmTranslucency': 1.2, 'cu.rmThickness': 0.09,
-      'cu.wallTexture': 'stone', 'cu.frameWood': 'ebony' },
+    description: 'Deep-blue translucent sheets around a pale icy heart, in an ebony frame on honed stone.',
+    values: { ...VELVET, 'cu.rmOuter': '#1a3348', 'cu.rmInner': '#5f8fb0', 'cu.rmGlowColor': '#a8dcff', 'cu.rmNoteColor': '#ffffff',
+      'cu.rmRimColor': '#9fd0f0', 'cu.rmSpeckColor': '#e2f6ff', 'cu.rmDustColor': '#6a9cc0', 'cu.rmLightColor': '#e2f0ff', 'cu.rmTranslucency': 0.9,
+      'cu.rmThickness': 0.14, 'cu.rmSpeck': 0.8, 'cu.rmThreadColor': '#d8ecff', 'cu.wallTexture': 'stone', 'cu.frameWood': 'ebony' },
   },
   {
     id: 'orchid', label: 'Orchid serpent',
-    description: 'Violet folds, rose heart, a long twisting body.',
-    values: { 'cu.engine': 'raymarch', 'cu.rmOuter': '#4a2f8a', 'cu.rmInner': '#c66aa8', 'cu.rmGlowColor': '#ff7ab8', 'cu.rmNoteColor': '#ffb0e0',
-      'cu.rmRimColor': '#c8a8ff', 'cu.rmSpeckColor': '#ff9ad0', 'cu.rmDustColor': '#9a7ad0', 'cu.rmTwist': 0.9, 'cu.rmSeparation': 2.8, 'cu.wallTexture': 'limewash' },
+    description: 'Violet folds around a rose heart, a long twisting body.',
+    values: { ...VELVET, 'cu.rmOuter': '#2a1850', 'cu.rmInner': '#7a3a78', 'cu.rmGlowColor': '#ff6ab0', 'cu.rmNoteColor': '#ffb0e0',
+      'cu.rmRimColor': '#b090f0', 'cu.rmSpeckColor': '#ff9ad0', 'cu.rmDustColor': '#7a5ab0', 'cu.rmLightColor': '#f0e2ff',
+      'cu.rmTwist': 0.8, 'cu.rmSeparation': 2.4, 'cu.rmBridge': 0.6, 'cu.rmThreadColor': '#f0c0e8', 'cu.wallTexture': 'limewash' },
   },
   {
     id: 'strands', label: 'Strand engine — navy',
@@ -59,7 +69,7 @@ const PRESETS: Preset[] = [
   {
     id: 'fullscreen', label: 'Canvas only',
     description: 'No room — the living painting fills the whole screen.',
-    values: { 'cu.engine': 'raymarch', 'cu.room': false },
+    values: { ...VELVET, 'cu.rmOuter': '#141c44', 'cu.rmInner': '#1c2758', 'cu.rmGlowColor': '#ff8a3a', 'cu.rmRimColor': '#6f88e0', 'cu.rmSpeckColor': '#ff9a3c', 'cu.rmDustColor': '#6a80c8', 'cu.room': false },
   },
 ];
 
