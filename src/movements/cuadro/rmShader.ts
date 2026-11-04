@@ -134,10 +134,12 @@ vec3 map(vec3 p) {
   // several nested sheet families: the isosurfaces n = k / layers
   float nl = n * uLayers;
   float sheet = abs(nl - floor(nl + 0.5)) / uLayers;
-  float th = uSheetTh * (1.0 + uSwell * noteSwell(p));
+  // sheets thin out toward the envelope, so the mass frays into its surroundings instead of ending in a cut
+  float inside = smoothstep(0.0, 0.55, -env);
+  float th = uSheetTh * (1.0 + uSwell * noteSwell(p)) * inside;
   float sd = (sheet - th) / (uSheetFreq * 1.9) ;
   // sheets fade out (thin away) toward the envelope, so the mass has a soft, frayed boundary
-  float d = max(sd, env);
+  float d = max(sd, env - 0.02);
   // the core: a shrunk envelope inside
   float core = envelope(p * (1.0 / max(uCoreR, 0.05))) * uCoreR + 0.05;
   float mat = 0.0;
@@ -236,10 +238,10 @@ void main() {
   col += uGlowCol * glow * uGlow * 0.6;
   col += noteGlow;
   // fine grainy dust where rays graze the body (soft frayed edges and haze)
-  float halo = exp(-max(nearest, 0.0) * (14.0 / max(uDustSize, 0.05)));
+  float halo = exp(-max(nearest, 0.0) * (30.0 / max(uDustSize, 0.05)));
   float grain = step(0.72, hash12(floor(gl_FragCoord.xy) + floor(uTime * 12.0) * 13.0));
-  col += uDustCol * halo * (grain * 0.9 + 0.15) * uDust * (hit ? 0.25 : 1.0);
-  col += uDustCol * halo * uHaze * 0.25;
+  col += uDustCol * halo * (grain * 0.6 + 0.05) * uDust * (hit ? 0.0 : 1.0);
+  col += uDustCol * halo * uHaze * 0.08;
 
   oColor = vec4(max(col, 0.0), hit ? t : 1e4);
 }

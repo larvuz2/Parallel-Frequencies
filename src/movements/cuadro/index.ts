@@ -15,9 +15,9 @@ const PRESETS: Preset[] = [
     description: 'Emerald velvet folds around a glowing dusty-rose heart; rose silk threads and copper specks.',
     values: {
       'cu.engine': 'raymarch',
-      'cu.rmOuter': '#1f5a45', 'cu.rmInner': '#c87882', 'cu.rmDepthMix': 1.1, 'cu.rmGlowColor': '#ff9a8a', 'cu.rmNoteColor': '#ffb8a0',
+      'cu.rmOuter': '#174a39', 'cu.rmInner': '#c87882', 'cu.rmDepthMix': 2.6, 'cu.rmGlowColor': '#ff9a8a', 'cu.rmNoteColor': '#ffb8a0',
       'cu.rmRimColor': '#7fd8b4', 'cu.rmSpeckColor': '#e08a5a', 'cu.rmDustColor': '#5fa88a', 'cu.rmLightColor': '#fff0ea',
-      'cu.rmThreadColor': '#f2b8b0', 'cu.rmThreadsPer': 24, 'cu.rmThreadBundles': 6, 'cu.rmThreadOpacity': 0.4,
+      'cu.rmThreadColor': '#f2b8b0', 'cu.rmThreadsPer': 24, 'cu.rmThreadBundles': 6, 'cu.rmThreadOpacity': 0.25,
       'cu.rmSpeck': 0.35, 'cu.rmGlow': 1.4, 'cu.rmTranslucency': 0.7, 'cu.rmSeparation': 1.9, 'cu.rmBalance': 0.25, 'cu.rmTilt': 0.2,
       'cu.wallColor': '#33373d', 'cu.lightColor': '#e6ecf2',
     },

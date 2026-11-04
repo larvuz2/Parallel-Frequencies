@@ -118,7 +118,7 @@ export const CUADRO_RM_PARAMS: ParamDef[] = [
   { key: 'cu.rmBridge', label: 'Bridge', group: 'rmShape', type: 'range', min: 0.05, max: 2, step: 0.01, default: 0.9, format: x2, hint: 'How broadly the two masses merge in the middle.' },
   { key: 'cu.rmLumpy', label: 'Lumpiness', group: 'rmShape', type: 'range', min: 0, max: 1.2, step: 0.01, default: 0.45, format: x2, hint: 'Irregular outline of the masses.' },
   { key: 'cu.rmFoldScale', label: 'Fold scale', group: 'rmShape', type: 'range', min: 0.3, max: 3, step: 0.01, default: 1.05, format: x2, hint: 'Small: a few large folds. Large: many small ones.' },
-  { key: 'cu.rmLayers', label: 'Fold layers', group: 'rmShape', type: 'range', min: 1, max: 4, step: 0.01, default: 1.5, format: x2, hint: 'How many nested sheets of cloth.' },
+  { key: 'cu.rmLayers', label: 'Fold layers', group: 'rmShape', type: 'range', min: 1, max: 4, step: 0.01, default: 1, format: x2, hint: 'How many nested sheets of cloth.' },
   { key: 'cu.rmThickness', label: 'Cloth thickness', group: 'rmShape', type: 'range', min: 0.02, max: 0.5, step: 0.005, default: 0.16, format: x3, hint: 'Thin: delicate translucent sheets. Thick: heavy velvet.' },
   { key: 'cu.rmWarp', label: 'Crumple', group: 'rmShape', type: 'range', min: 0, max: 3, step: 0.01, default: 1.2, format: x2, hint: 'How twisted and crumpled the folds are.' },
   { key: 'cu.rmTwist', label: 'Twist', group: 'rmShape', type: 'range', min: -1.5, max: 1.5, step: 0.01, default: 0.2, format: x2 },
@@ -128,7 +128,7 @@ export const CUADRO_RM_PARAMS: ParamDef[] = [
 
   { key: 'cu.rmOuter', label: 'Outer folds', group: 'rmColour', type: 'color', default: '#1f3f9a' },
   { key: 'cu.rmInner', label: 'Inner folds', group: 'rmColour', type: 'color', default: '#2d3f8a' },
-  { key: 'cu.rmDepthMix', label: 'Inner colour reach', group: 'rmColour', type: 'range', min: 0, max: 4, step: 0.01, default: 1.4, format: x2, hint: 'How quickly folds turn to the inner colour as they lie deeper.' },
+  { key: 'cu.rmDepthMix', label: 'Inner colour reach', group: 'rmColour', type: 'range', min: 0, max: 4, step: 0.01, default: 2.2, format: x2, hint: 'How quickly folds turn to the inner colour as they lie deeper.' },
   { key: 'cu.rmGlowColor', label: 'Heart glow', group: 'rmColour', type: 'color', default: '#ff9a4a' },
   { key: 'cu.rmNoteColor', label: 'Note light', group: 'rmColour', type: 'color', default: '#ffb070' },
   { key: 'cu.rmRimColor', label: 'Rim', group: 'rmColour', type: 'color', default: '#9fb4ff' },
@@ -148,7 +148,7 @@ export const CUADRO_RM_PARAMS: ParamDef[] = [
 
   { key: 'cu.rmGlow', label: 'Heart glow', group: 'rmGlow', type: 'range', min: 0, max: 4, step: 0.01, default: 1.0, format: x2, hint: 'Light gathered between the folds deep inside.' },
   { key: 'cu.rmSpeck', label: 'Specks', group: 'rmGlow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.6, format: x2, hint: 'Glittering specks scattered over patches of the skin.' },
-  { key: 'cu.rmDust', label: 'Dusty edges', group: 'rmGlow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.6, format: x2, hint: 'Fine grain dissolving the silhouette into dust.' },
+  { key: 'cu.rmDust', label: 'Dusty edges', group: 'rmGlow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.35, format: x2, hint: 'Fine grain dissolving the silhouette into dust.' },
   { key: 'cu.rmDustSize', label: 'Dust reach', group: 'rmGlow', type: 'range', min: 0.1, max: 4, step: 0.01, default: 1, format: x2 },
   { key: 'cu.rmHaze', label: 'Haze', group: 'rmGlow', type: 'range', min: 0, max: 3, step: 0.01, default: 0.4, format: x2 },
   { key: 'cu.rmNoteGlow', label: 'Note glow', group: 'rmGlow', type: 'range', min: 0, max: 4, step: 0.01, default: 1.2, format: x2 },
@@ -159,7 +159,7 @@ export const CUADRO_RM_PARAMS: ParamDef[] = [
   { key: 'cu.rmThreadsPer', label: 'Threads per bundle', group: 'rmThreads', type: 'range', min: 1, max: 60, step: 1, default: 18 },
   { key: 'cu.rmThreadSpread', label: 'Spread', group: 'rmThreads', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.45, format: x2 },
   { key: 'cu.rmThreadBow', label: 'Curve', group: 'rmThreads', type: 'range', min: 0, max: 1.5, step: 0.01, default: 0.45, format: x2 },
-  { key: 'cu.rmThreadOpacity', label: 'Brightness', group: 'rmThreads', type: 'range', min: 0, max: 2, step: 0.01, default: 0.35, format: x2 },
+  { key: 'cu.rmThreadOpacity', label: 'Brightness', group: 'rmThreads', type: 'range', min: 0, max: 2, step: 0.01, default: 0.22, format: x2 },
   { key: 'cu.rmThreadColor', label: 'Colour', group: 'rmThreads', type: 'color', default: '#c8d4ff' },
   { key: 'cu.rmSeed', label: 'Variation', group: 'rmThreads', type: 'range', min: 1, max: 99, step: 1, default: 7, hint: 'A different arrangement of the bundles.' },
 
